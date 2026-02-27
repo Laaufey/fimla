@@ -1,7 +1,6 @@
 import { useSession } from "next-auth/react";
 import React from "react";
 import { useEffect, useState } from "react";
-import { prisma } from "../../lib/prisma";
 import LoadingIcon from "../components/LoadingIcon";
 
 const Leaderboard = ({ wordleSessionStats, quordleSessionStats }) => {
@@ -82,11 +81,17 @@ const Leaderboard = ({ wordleSessionStats, quordleSessionStats }) => {
 export default Leaderboard;
 
 export const getServerSideProps = async () => {
-  const wordleData = await prisma.wordleStats.findMany({});
-  const quordleData = await prisma.quordleStats.findMany({});
+  try {
+    const { prisma } = await import("../../lib/prisma");
+    const wordleData = await prisma.wordleStats.findMany({});
+    const quordleData = await prisma.quordleStats.findMany({});
 
-  const wordleSessionStats = wordleData || null;
-  const quordleSessionStats = quordleData || null;
+    const wordleSessionStats = wordleData || null;
+    const quordleSessionStats = quordleData || null;
 
-  return { props: { wordleSessionStats, quordleSessionStats } };
+    return { props: { wordleSessionStats, quordleSessionStats } };
+  } catch (error) {
+    console.error("Leaderboard getServerSideProps failed:", error);
+    return { props: { wordleSessionStats: [], quordleSessionStats: [] } };
+  }
 };

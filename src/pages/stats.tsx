@@ -1,6 +1,5 @@
 import { getSession, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { prisma } from "../../lib/prisma";
 import LoadingIcon from "../components/LoadingIcon";
 
 const Stats = ({
@@ -214,30 +213,42 @@ const Stats = ({
 export default Stats;
 
 export const getServerSideProps = async ({ req }) => {
-  const session = await getSession({ req });
-  const getEmail = session?.user?.email;
-  const userEmail = getEmail?.toString();
+  try {
+    const { prisma } = await import("../../lib/prisma");
+    const session = await getSession({ req });
+    const getEmail = session?.user?.email;
+    const userEmail = getEmail?.toString();
 
-  const wordleData = await prisma.wordleStats.findMany({
-    where: {
-      userEmail: userEmail,
-    },
-  });
-  const quordleData = await prisma.quordleStats.findMany({
-    where: {
-      userEmail: userEmail,
-    },
-  });
-  const beeData = await prisma.spellingBeeStats.findMany({
-    where: {
-      userEmail: userEmail,
-    },
-  });
-  const wordleSessionStats = wordleData[0] || null;
-  const quordleSessionStats = quordleData[0] || null;
-  const beeSessionStats = beeData[0] || null;
+    const wordleData = await prisma.wordleStats.findMany({
+      where: {
+        userEmail: userEmail,
+      },
+    });
+    const quordleData = await prisma.quordleStats.findMany({
+      where: {
+        userEmail: userEmail,
+      },
+    });
+    const beeData = await prisma.spellingBeeStats.findMany({
+      where: {
+        userEmail: userEmail,
+      },
+    });
+    const wordleSessionStats = wordleData[0] || null;
+    const quordleSessionStats = quordleData[0] || null;
+    const beeSessionStats = beeData[0] || null;
 
-  return {
-    props: { wordleSessionStats, quordleSessionStats, beeSessionStats },
-  };
+    return {
+      props: { wordleSessionStats, quordleSessionStats, beeSessionStats },
+    };
+  } catch (error) {
+    console.error("Stats getServerSideProps failed:", error);
+    return {
+      props: {
+        wordleSessionStats: null,
+        quordleSessionStats: null,
+        beeSessionStats: null,
+      },
+    };
+  }
 };
