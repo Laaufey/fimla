@@ -1,6 +1,5 @@
 import { getSession, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { prisma } from "../../lib/prisma";
 import LoadingIcon from "../components/LoadingIcon";
 
 const Stats = ({
@@ -215,6 +214,7 @@ export default Stats;
 
 export const getServerSideProps = async ({ req }) => {
   try {
+    const { prisma } = await import("../../lib/prisma");
     const session = await getSession({ req });
     const getEmail = session?.user?.email;
     const userEmail = getEmail?.toString();
