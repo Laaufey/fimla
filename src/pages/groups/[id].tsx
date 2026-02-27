@@ -64,8 +64,12 @@ const Tournament = () => {
   const getUsersInTournaments = async () => {
     getById("single-tournament", tournamentId).then((result) => {
       setUsersInTournament(result);
-      if (result.filter((i) => i.userEmail === userEmail))
+      const filtered = result.filter((i) => i.userEmail === userEmail);
+      if (filtered[0]) {
         setInTournament(true);
+      } else {
+        console.log("not in tournament");
+      }
     });
   };
 

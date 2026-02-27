@@ -18,7 +18,7 @@ const UserNameModal = () => {
   };
   readUser();
   return (
-    <div className="absolute left-0 right-0 m-auto mt-20 flex flex-col w-2/3 p-8 space-y-4 justify-evenly items-center md:w-1/2 rounded-xl bg-lightest dark:bg-dark">
+    <div className="absolute z-20 left-0 right-0 m-auto mt-20 flex flex-col w-2/3 p-8 space-y-4 justify-evenly items-center md:w-1/2 rounded-xl bg-lightest dark:bg-dark">
       <div className="flex justify-between">
         <h1 className="heading-1">Welcome to Fimla!</h1>
       </div>
