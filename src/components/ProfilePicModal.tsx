@@ -84,7 +84,7 @@ const ProfilePicModal = ({ closeModal, setImageSrcReady }) => {
       <p>Update your profile picture here!</p>
 
       <div className="bg-black rounded-full h-24 w-24 overflow-hidden">
-        <Image width={100} height={100} alt="img" src={imageSrc} />
+        <Image width={100} height={100} alt="profile picture" src={imageSrc} />
       </div>
 
       <form

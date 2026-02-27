@@ -12,7 +12,7 @@ import getByUserEmail from "../../../lib/getByUserEmail";
 import LoadingIcon from "../../components/LoadingIcon";
 
 const Quordle = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const userEmail = session?.user?.email;
   const userSession = session?.user;
   const [stats, setStats] = useState({

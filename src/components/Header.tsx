@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import React from "react";
 import { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -14,9 +15,7 @@ const Header = () => {
 
   // Mobile menu
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const showMobileMenu = () => {
-    mobileMenuOpen ? setMobileMenuOpen(false) : setMobileMenuOpen(true);
-  };
+ 
   const mobileMenu = () => {
     return (
       <div className="flex flex-col w-full text-center lg:hidden">
@@ -26,7 +25,7 @@ const Header = () => {
               {link.dropdown === true ? (
                 <>
                   <div
-                    onClick={showDropdown}
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="flex py-6 space-x-3 text-xl border-t cursor-pointer center"
                   >
                     <div>{link.name}</div>
@@ -68,10 +67,6 @@ const Header = () => {
 
   // Dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const showDropdown = () => {
-    console.log(dropdownOpen);
-    dropdownOpen ? setDropdownOpen(false) : setDropdownOpen(true);
-  };
 
   const dropdown = () => {
     return (
@@ -102,9 +97,9 @@ const Header = () => {
         <div className="w-1/5">
           <Link href="/">
             {theme === "light" ? (
-              <img src="/logo-light.png" alt="logo-light" className="w-20" />
+              <Image src="/logo-light.png" alt="logo-light" width={100} height={100}/>
             ) : (
-              <img src="/logo-dark.png" alt="logo-dark" className="w-20" />
+              <Image src="/logo-dark.png" alt="logo-dark" width={100} height={100} />
             )}
           </Link>
         </div>
@@ -168,7 +163,7 @@ const Header = () => {
           <button
             aria-label="navigation-menu"
             onClick={() => {
-              showMobileMenu();
+              setMobileMenuOpen(!mobileMenuOpen);
             }}
             className="col-span-2 text-xl text-center lg:hidden"
           >

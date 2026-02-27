@@ -43,7 +43,6 @@ const UserNameModal = () => {
         </p>
       </form>
       <div className="relative">
-        {/* <Image src="/how-to-sb.png" alt="img" width={300} height={300} /> */}
       </div>
     </div>
   );
