@@ -82,11 +82,16 @@ const Leaderboard = ({ wordleSessionStats, quordleSessionStats }) => {
 export default Leaderboard;
 
 export const getServerSideProps = async () => {
-  const wordleData = await prisma.wordleStats.findMany({});
-  const quordleData = await prisma.quordleStats.findMany({});
+  try {
+    const wordleData = await prisma.wordleStats.findMany({});
+    const quordleData = await prisma.quordleStats.findMany({});
 
-  const wordleSessionStats = wordleData || null;
-  const quordleSessionStats = quordleData || null;
+    const wordleSessionStats = wordleData || null;
+    const quordleSessionStats = quordleData || null;
 
-  return { props: { wordleSessionStats, quordleSessionStats } };
+    return { props: { wordleSessionStats, quordleSessionStats } };
+  } catch (error) {
+    console.error("Leaderboard getServerSideProps failed:", error);
+    return { props: { wordleSessionStats: [], quordleSessionStats: [] } };
+  }
 };
