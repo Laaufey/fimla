@@ -14,9 +14,9 @@ const UserInfoModal = ({ onClick, userInfo }) => {
     e.preventDefault();
     const body = { userEmail, userName, userDob, userLocation };
     if (userInfo) {
-      updateData("userinfo", "PUT", body);
+      await updateData("userinfo", "PUT", body);
     } else {
-      updateData("userinfo", "POST", body);
+      await updateData("userinfo", "POST", body);
     }
     window.location.reload();
   };

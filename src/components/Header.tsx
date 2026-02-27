@@ -104,8 +104,14 @@ const Header = () => {
           </Link>
         </div>
 
-        <div className="relative items-center hidden w-3/5 justify-evenly lg:flex">
-          <div className="absolute z-10 top-8 left-12">
+        <div
+          className="relative items-center hidden w-3/5 justify-evenly lg:flex"
+          onMouseLeave={() => setDropdownOpen(false)}
+        >
+          <div
+            className="absolute z-10 top-8 left-12"
+            onMouseLeave={() => setDropdownOpen(false)}
+          >
             {dropdownOpen ? dropdown() : ""}
           </div>
           {React.Children.toArray(
@@ -132,7 +138,11 @@ const Header = () => {
                       <div>{link.name}</div>
                     </div>
                   ) : (
-                    <Link className="flex space-x-3 center" href={link.path}>
+                    <Link
+                      className="flex space-x-3 center"
+                      href={link.path}
+                      onMouseEnter={() => setDropdownOpen(false)}
+                    >
                       <div
                         className={`${active} w-6 h-6 border border-black rounded-full dark:border-white`}
                       ></div>
