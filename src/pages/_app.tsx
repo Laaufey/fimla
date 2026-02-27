@@ -3,18 +3,15 @@ import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import Layout from "../components/Layout";
-import { Manrope } from "@next/font/google";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
-
-const manrope = Manrope({ subsets: ["latin"] });
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   return (
     <SessionProvider session={pageProps.session}>
       <ThemeProvider attribute="class">
-        <main className={manrope.className}>
+        <main className="font-sans">
           <Layout>
             <AnimatePresence exitBeforeEnter>
               <motion.div
