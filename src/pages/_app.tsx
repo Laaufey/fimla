@@ -13,7 +13,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider attribute="class">
         <main className="font-sans">
           <Layout>
-            <AnimatePresence exitBeforeEnter>
+            <AnimatePresence mode="wait">
               <motion.div
                 key={router.route}
                 initial="initialState"
