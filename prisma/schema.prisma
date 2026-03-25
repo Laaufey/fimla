@@ -1,32 +1,30 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId])
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -35,23 +33,24 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model User {
-  id                String    @id @default(cuid())
-  name              String?
-  email             String?   @unique
-  emailVerified     DateTime?
-  image             String?
-  accounts          Account[]
-  sessions          Session[]
-  userInfo          UserInfo?
-  Tournaments       UsersInTournament[]
-  wordleStats       WordleStats?
-  quordleStats      QuordleStats?
-  spellingBeeStats  SpellingBeeStats?
-  
+  id               String              @id @default(cuid())
+  name             String?
+  email            String?             @unique
+  passwordHash     String?
+  emailVerified    DateTime?
+  image            String?
+  accounts         Account[]
+  sessions         Session[]
+  userInfo         UserInfo?
+  Tournaments      UsersInTournament[]
+  wordleStats      WordleStats?
+  quordleStats     QuordleStats?
+  spellingBeeStats SpellingBeeStats?
 }
 
 model VerificationToken {
@@ -63,68 +62,69 @@ model VerificationToken {
 }
 
 model WordleStats {
-  id          String  @id @default(cuid())
-  wins        Int     @default(0)
-  losses      Int     @default(0)
-  totalScore  Int     @default(0)
-  user        User    @relation(fields: [userEmail], references: [email], onDelete: Cascade)
-  userEmail   String  @unique
+  id         String @id @default(cuid())
+  wins       Int    @default(0)
+  losses     Int    @default(0)
+  totalScore Int    @default(0)
+  userEmail  String @unique
+  user       User   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
 }
 
 model QuordleStats {
-  id          String  @id @default(cuid())
-  wins        Int     @default(0)
-  losses      Int     @default(0)
-  totalScore  Int     @default(0)
-  user        User    @relation(fields: [userEmail], references: [email], onDelete: Cascade)
-  userEmail   String  @unique
+  id         String @id @default(cuid())
+  wins       Int    @default(0)
+  losses     Int    @default(0)
+  totalScore Int    @default(0)
+  userEmail  String @unique
+  user       User   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
 }
 
 model SpellingBeeStats {
-  id          String  @id @default(cuid())
-  totalScore  Int     @default(0)
-  user        User    @relation(fields: [userEmail], references: [email], onDelete: Cascade)
-  userEmail   String  @unique
+  id         String @id @default(cuid())
+  totalScore Int    @default(0)
+  userEmail  String @unique
+  user       User   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
 }
 
 model Tournaments {
-  id          String  @id @default(cuid())
-  name        String
-  users       UsersInTournament[]
-  comments    Comment[]
+  id       String              @id @default(cuid())
+  name     String
+  users    UsersInTournament[]
+  comments Comment[]
 }
 
 model UsersInTournament {
-  user            User @relation(fields: [userEmail], references: [email], onDelete: Cascade)
-  userEmail       String 
-  userName        String @default("")
-  tournament      Tournaments @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  tournamentId    String
-  tournamentName  String @default("")
-  gamesPlayed     Int @default(0)
-  totalScore      Int @default(0)
+  userEmail      String
+  userName       String      @default("")
+  tournamentId   String
+  tournamentName String      @default("")
+  gamesPlayed    Int         @default(0)
+  totalScore     Int         @default(0)
+  user           User        @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+  tournament     Tournaments @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@id([userEmail, tournamentId])
   @@index([userEmail])
   @@index([tournamentId])
-  @@id([userEmail,   tournamentId])
 }
 
 model UserInfo {
-  id            Int       @id @default(autoincrement())
-  username      String?  
-  userDob       String?
-  userLocation  String?
-  user          User?     @relation(fields: [userEmail], references: [email], onDelete: Cascade)
-  userEmail     String?   @unique
+  id           Int     @id @default(autoincrement())
+  username     String?
+  userDob      String?
+  userLocation String?
+  userEmail    String? @unique
+  user         User?   @relation(fields: [userEmail], references: [email], onDelete: Cascade)
 }
 
 model Comment {
-  id            Int       @id @default(autoincrement())
-  time          DateTime?
-  text          String
-  userName      String
-  tournamentId  String
-  userEmail     String
+  id           Int         @id @default(autoincrement())
+  time         DateTime?
+  text         String
+  userName     String
+  tournamentId String
+  userEmail    String
+  tournament   Tournaments @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
-  tournament Tournaments @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   @@index([tournamentId])
 }
