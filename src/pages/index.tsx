@@ -4,14 +4,12 @@ import React from "react";
 import { games } from "../data/paths";
 import Head from "next/head";
 import GameCard from "../components/GameCard";
-import LoadingIcon from "../components/LoadingIcon";
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
-  if (status === "loading") {
-    return <LoadingIcon isPage />;
-  }
+  const displayName =
+    session?.user?.name?.split(" ")[0] || session?.user?.email?.split("@")[0];
 
   return (
     <>
@@ -30,19 +28,30 @@ export default function Home() {
         <meta name="keywords" content="wordgames" key="titleKeywords" />
       </Head>
 
-      <section className="grid w-full gap-6 md:gap-3 lg:gap-6 lg:p-6 md:mt-12 sm:grid-cols-2 grid-rows-auto">
+      {session && (
+        <section className="w-full mt-8 mb-2 lg:p-6">
+          <h1 className="heading-1">Hello, {displayName}</h1>
+          <p className="mt-1">Ready for today&apos;s games?</p>
+        </section>
+      )}
+
+      <section
+        className={`grid w-full gap-6 md:gap-3 lg:gap-6 lg:p-6 sm:grid-cols-2 grid-rows-auto ${
+          session ? "md:mt-0" : "md:mt-12"
+        }`}
+      >
         {React.Children.toArray(
           games.map((game) => (
             <Link href={game.path}>
-              <GameCard image={game.image} title={game.name} placeholderImg={game.placeholderImg}/>
+              <GameCard
+                image={game.image}
+                title={game.name}
+                placeholderImg={game.placeholderImg}
+              />
             </Link>
           ))
         )}
       </section>
-
-      <div className="mt-6">
-        {session && <p>Signed in as {session.user?.name}</p>}
-      </div>
     </>
   );
 }

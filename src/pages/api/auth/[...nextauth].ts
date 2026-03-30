@@ -1,34 +1,13 @@
 import NextAuth from "next-auth";
 import type { Provider } from "next-auth/providers";
-import EmailProvider from "next-auth/providers/email";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
+import { compare } from "bcryptjs";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../../lib/prisma";
 
 const providers: Provider[] = [];
-
-if (
-  process.env.EMAIL_SERVER_HOST &&
-  process.env.EMAIL_SERVER_PORT &&
-  process.env.EMAIL_SERVER_USER &&
-  process.env.EMAIL_SERVER_PASSWORD &&
-  process.env.EMAIL_FROM
-) {
-  providers.push(
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: Number(process.env.EMAIL_SERVER_PORT),
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
-      },
-      from: process.env.EMAIL_FROM,
-    })
-  );
-}
 
 if (process.env.GITHUB_ID && process.env.GITHUB_SECRET) {
   providers.push(
@@ -50,9 +29,54 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   );
 }
 
+providers.push(
+  CredentialsProvider({
+    name: "Email and Password",
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
+    },
+    async authorize(credentials) {
+      if (!credentials?.email || !credentials?.password) {
+        return null;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { email: credentials.email },
+      });
+
+      if (!user?.passwordHash) {
+        return null;
+      }
+
+      const validPassword = await compare(
+        credentials.password,
+        user.passwordHash
+      );
+
+      if (!validPassword) {
+        return null;
+      }
+
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      };
+    },
+  })
+);
+
 export default NextAuth({
   adapter: PrismaAdapter(prisma),
   providers,
+  pages: {
+    signIn: "/auth/signin",
+  },
+  session: {
+    strategy: "jwt",
+  },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
 });

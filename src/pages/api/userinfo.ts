@@ -13,10 +13,11 @@ export default async function handler(
         const userInfo = await prisma.userInfo.findMany();
         return res.status(200).json(userInfo);
       } catch (error) {
-        res
+        return res
           .status(500)
           .json({ error: "Error reading from database", success: false });
       }
+      break;
     case "POST":
       try {
         const userInfo = await prisma.userInfo.create({
@@ -29,10 +30,11 @@ export default async function handler(
         });
         return res.status(200).json(userInfo);
       } catch (error) {
-        res
+        return res
           .status(500)
           .json({ error: "Error adding to database", success: false });
       }
+      break;
     case "PUT":
       try {
         const userInfo = await prisma.userInfo.update({
@@ -47,7 +49,7 @@ export default async function handler(
         });
         return res.status(200).json(userInfo);
       } catch (error) {
-        res
+        return res
           .status(500)
           .json({ error: "Error adding to database", success: false });
       }
