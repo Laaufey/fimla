@@ -1,8 +1,10 @@
 {
+  "compilerOptions": {
+    "types": ["cypress", "node"]
+  },
   "include": [
     "**/*.ts",
-    "component/QuordleGrid.cy.tsx",
-    "component/Footer.cy.tsx"
+    "**/*.tsx"
   ],
   "extends": "../tsconfig.json"
 }
