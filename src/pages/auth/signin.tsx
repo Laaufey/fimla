@@ -1,11 +1,12 @@
 import { FormEvent, useState } from "react";
-import { getProviders, signIn } from "next-auth/react";
+import { getProviders, getSession, signIn } from "next-auth/react";
 
 type SignInProps = {
+  callbackUrl: string;
   providers: Awaited<ReturnType<typeof getProviders>>;
 };
 
-const SignIn = ({ providers }: SignInProps) => {
+const SignIn = ({ callbackUrl, providers }: SignInProps) => {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
@@ -21,7 +22,7 @@ const SignIn = ({ providers }: SignInProps) => {
     const result = await signIn("credentials", {
       email: signInEmail,
       password: signInPassword,
-      callbackUrl: "/",
+      callbackUrl,
       redirect: false,
     });
 
@@ -30,7 +31,7 @@ const SignIn = ({ providers }: SignInProps) => {
       return;
     }
 
-    window.location.href = "/";
+    window.location.href = callbackUrl;
   };
 
   const handleSignUp = async (e: FormEvent) => {
@@ -57,7 +58,7 @@ const SignIn = ({ providers }: SignInProps) => {
     const result = await signIn("credentials", {
       email: signUpEmail,
       password: signUpPassword,
-      callbackUrl: "/",
+      callbackUrl,
       redirect: false,
     });
 
@@ -66,7 +67,7 @@ const SignIn = ({ providers }: SignInProps) => {
       return;
     }
 
-    window.location.href = "/";
+    window.location.href = callbackUrl;
   };
 
   const oauthProviders = providers
@@ -151,7 +152,11 @@ const SignIn = ({ providers }: SignInProps) => {
           {oauthProviders.map((provider) => (
             <button
               key={provider.id}
-              onClick={() => signIn(provider.id)}
+              onClick={() =>
+                signIn(provider.id, {
+                  callbackUrl,
+                })
+              }
               className="w-full py-2.5 text-sm border rounded-xl dark:border-gray-600"
             >
               {mode === "signin" ? "Log in" : "Create account"} with{" "}
@@ -183,10 +188,27 @@ const SignIn = ({ providers }: SignInProps) => {
 
 export default SignIn;
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const callbackUrl =
+    typeof context.query.callbackUrl === "string" &&
+    context.query.callbackUrl.length > 0
+      ? context.query.callbackUrl
+      : "/";
+  const session = await getSession(context);
+
+  if (session) {
+    return {
+      redirect: {
+        destination: callbackUrl,
+        permanent: false,
+      },
+    };
+  }
+
   const providers = await getProviders();
   return {
     props: {
+      callbackUrl,
       providers: providers ?? {},
     },
   };

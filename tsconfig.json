@@ -25,6 +25,6 @@
     "src/stores/SpellingBeeStore.jsx",
     "src/pages/chat/chat.js"
   ],
-  "types": ["cypress", "cypress-axe", "node"],
+  "types": ["cypress", "node"],
   "exclude": ["node_modules", ".next"]
 }

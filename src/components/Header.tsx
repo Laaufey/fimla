@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { navLinks, games } from "../data/paths";
 import { useTheme } from "next-themes";
@@ -67,15 +66,39 @@ const Header = () => {
 
   // Dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const closeDropdownTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openDropdown = () => {
+    if (closeDropdownTimeout.current) {
+      clearTimeout(closeDropdownTimeout.current);
+      closeDropdownTimeout.current = null;
+    }
+    setDropdownOpen(true);
+  };
+
+  const closeDropdown = (delay = 150) => {
+    if (closeDropdownTimeout.current) {
+      clearTimeout(closeDropdownTimeout.current);
+    }
+
+    closeDropdownTimeout.current = setTimeout(() => {
+      setDropdownOpen(false);
+      closeDropdownTimeout.current = null;
+    }, delay);
+  };
 
   const dropdown = () => {
     return (
-      <div className="flex flex-col border bg-white/80 dark:bg-dark/80 lg:w-36 lg:rounded-xl">
+      <div
+        className="flex flex-col border bg-white/80 dark:bg-dark/80 lg:w-36 lg:rounded-xl"
+        onMouseEnter={openDropdown}
+        onMouseLeave={() => closeDropdown()}
+      >
         {React.Children.toArray(
           games.map((link) => (
             <Link
               onClick={() => setDropdownOpen(false)}
-              onMouseEnter={() => setDropdownOpen(true)}
+              onMouseEnter={openDropdown}
               href={link.path}
               className="p-3 border-b hover:bg-lightest/60 last:border-b-0 hover:first:rounded-t-xl hover:last:rounded-b-xl hover:dark:bg-darker"
             >
@@ -88,7 +111,15 @@ const Header = () => {
   };
 
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+
+    return () => {
+      if (closeDropdownTimeout.current) {
+        clearTimeout(closeDropdownTimeout.current);
+      }
+    };
+  }, []);
   if (!mounted) return null;
 
   return (
@@ -106,11 +137,12 @@ const Header = () => {
 
         <div
           className="relative items-center hidden w-3/5 justify-evenly lg:flex"
-          onMouseLeave={() => setDropdownOpen(false)}
+          onMouseLeave={() => closeDropdown()}
         >
           <div
-            className="absolute z-10 top-8 left-12"
-            onMouseLeave={() => setDropdownOpen(false)}
+            className="absolute left-12 top-8 z-10 pt-4"
+            onMouseEnter={openDropdown}
+            onMouseLeave={() => closeDropdown()}
           >
             {dropdownOpen ? dropdown() : ""}
           </div>
@@ -124,12 +156,12 @@ const Header = () => {
                 router.pathname.includes("/games") || dropdownOpen
                   ? "bg-black dark:bg-white"
                   : "bg-transparent";
-              return (
-                <div>
+                return (
+                  <div>
                   {link.dropdown === true ? (
                     <div
                       onClick={() => setDropdownOpen(!dropdownOpen)}
-                      onMouseEnter={() => setDropdownOpen(true)}
+                      onMouseEnter={openDropdown}
                       className="flex space-x-3 cursor-pointer center"
                     >
                       <div
@@ -141,7 +173,7 @@ const Header = () => {
                     <Link
                       className="flex space-x-3 center"
                       href={link.path}
-                      onMouseEnter={() => setDropdownOpen(false)}
+                      onMouseEnter={() => closeDropdown(0)}
                     >
                       <div
                         className={`${active} w-6 h-6 border border-black rounded-full dark:border-white`}
