@@ -74,7 +74,7 @@ const ProfilePicModal = ({ closeModal, setImageSrcReady }) => {
   }, []);
 
   return (
-    <div className="absolute left-0 shadow-xl right-0 m-auto flex flex-col w-4/5 p-8 space-y-4 justify-evenly items-center lg:w-2/3 rounded-xl bg-lightest dark:bg-dark">
+    <div className="shadow-xl flex flex-col w-[90vw] max-w-md p-8 space-y-4 justify-evenly items-center rounded-xl bg-lightest dark:bg-dark">
       <div className="flex justify-between">
         <h1 className="heading-1">Profile Picture</h1>
         <button className="heading-1" onClick={closeModal}>
@@ -83,7 +83,7 @@ const ProfilePicModal = ({ closeModal, setImageSrcReady }) => {
       </div>
       <p>Update your profile picture here!</p>
 
-      <div className="bg-black rounded-full h-24 w-24 overflow-hidden">
+      <div className="bg-ink rounded-full h-24 w-24 overflow-hidden">
         <Image width={100} height={100} alt="profile picture" src={imageSrc} />
       </div>
 

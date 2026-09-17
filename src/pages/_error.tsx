@@ -6,7 +6,7 @@ type ErrorPageProps = {
 
 function ErrorPage({ statusCode }: ErrorPageProps) {
   return (
-    <main style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+    <main style={{ padding: "2rem", fontFamily: "var(--font-body)" }}>
       <h1>{statusCode || 500}</h1>
       <p>Something went wrong while loading this page.</p>
     </main>

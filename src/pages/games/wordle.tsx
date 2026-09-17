@@ -1,12 +1,24 @@
-import Link from "next/link";
 import { observer, useLocalObservable } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
+import { MdOutlineKeyboard, MdOutlineKeyboardHide } from "react-icons/md";
 
-import WordGrid from "../../components/WordGrid";
+import WordGrid, { REVEAL_DURATION_MS } from "../../components/WordGrid";
 import Keyboard from "../../components/Keyboard";
 import WordleStore from "../../stores/WordleStore.jsx";
 import OnboardingModal from "../../components/OnboardingModal";
+import PaletteLegend from "../../components/PaletteLegend";
+import ModalBackdrop from "../../components/ModalBackdrop";
+import ResultModal, {
+  WordleCompletionIcon,
+} from "../../components/ResultModal";
+import GameShell from "../../components/GameShell";
+import GameToolbar from "../../components/GameToolbar";
+import PaletteSwitch from "../../components/PaletteSwitch";
+import IconButton from "../../components/IconButton";
+import useWordGamePalette from "../../hooks/useWordGamePalette";
+import useOnScreenKeyboardVisibility from "../../hooks/useOnScreenKeyboardVisibility";
 import getByUserEmail from "../../../lib/getByUserEmail";
 import updateData from "../../../lib/updateData";
 import LoadingIcon from "../../components/LoadingIcon";
@@ -25,6 +37,22 @@ const Wordle = () => {
   const store = useLocalObservable(() => WordleStore);
   const [onboardingModal, setOnboardingModal] = useState(false);
   const [wordleVisited, setWordleVisited] = useState(true);
+  const [resultDismissed, setResultDismissed] = useState(false);
+  const [resultReady, setResultReady] = useState(false);
+  const { palette, setPalette } = useWordGamePalette();
+  const { visible: keyboardVisible, setVisible: setKeyboardVisible } =
+    useOnScreenKeyboardVisibility();
+
+  // Wait for the last tile's flip/reveal animation to finish before
+  // showing the win/loss modal, so it never covers the reveal.
+  useEffect(() => {
+    if (!(store.won || store.lost)) {
+      setResultReady(false);
+      return;
+    }
+    const timer = setTimeout(() => setResultReady(true), REVEAL_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [store.won, store.lost]);
 
   useEffect(() => {
     store.startGame();
@@ -56,7 +84,6 @@ const Wordle = () => {
     );
 
   useEffect(() => {
-    console.log(store.word);
     getStats();
   }, [session]);
 
@@ -102,61 +129,83 @@ const Wordle = () => {
   if (status === "loading") return <LoadingIcon isPage />;
 
   return (
-    <div className="flex flex-col items-center my-10 justify-evenly">
-      <div className="flex justify-center">
-        {onboardingModal ? (
+    <GameShell>
+      {onboardingModal ? (
+        <ModalBackdrop>
           <OnboardingModal
             title="How to play Wordle"
-            textOne="Try to guess the word in 6 tries. After each guess, the color of the tiles will change to show how close your guess was to the word."
-            textTwo="The letter H is in the word and in the correct spot. The letter O is in the word but in the wrong spot."
-            image="/how-to-play.png"
-            alt="wordle-letters"
+            textOne="Guess the word in 6 tries. After each guess, every tile updates to show how close you were - using whichever color palette you've picked below (Fimla or Classic)."
+            demo={<PaletteLegend />}
             onClick={() => setOnboardingModal(false)}
           />
-        ) : null}
-      </div>
-      <div className="flex items-center justify-between w-full border-b-2">
-        <h1 className="pb-2 heading-1">Wordle</h1>
-        <div className="flex cursor-pointer gap-x-6">
-          <Link href="/stats">Stats</Link>
-          <button onClick={() => setOnboardingModal(true)}>How to play</button>
-        </div>
-      </div>
-      <h1 className="flex items-center h-10 px-2 rounded-md text-error">
-        {store.error}
-      </h1>
-      {store.guesses.map((_, i) => (
-        <WordGrid
-          word={store.word}
-          guess={store.guesses[i]}
-          isGuessed={i < store.numberOfGuesses}
-          key={i}
+        </ModalBackdrop>
+      ) : null}
+
+      <GameToolbar title="Wordle">
+        <PaletteSwitch palette={palette} onChange={setPalette} />
+        <IconButton
+          icon={HiOutlineQuestionMarkCircle}
+          label="How to play"
+          onClick={() => setOnboardingModal(true)}
         />
-      ))}
-      {store.won && (
-        <h1 className="text-lg font-bold">You won! You are good!</h1>
+        <IconButton
+          icon={keyboardVisible ? MdOutlineKeyboardHide : MdOutlineKeyboard}
+          label={keyboardVisible ? "Hide keyboard" : "Show keyboard"}
+          active={keyboardVisible}
+          onClick={() => setKeyboardVisible(!keyboardVisible)}
+        />
+      </GameToolbar>
+
+      {store.error && (
+        <p className="flex items-center justify-center h-6 px-2 rounded-md text-error text-sm">
+          {store.error}
+        </p>
       )}
-      {store.lost && (
-        <div className="flex items-center my-2 gap-x-8">
-          <p className="text-lg font-bold">Almost! The correct word was:</p>
-          <div>
-            <p className="text-lg font-bold text-green">{store.word}</p>
-          </div>
-        </div>
+
+      <div className="flex flex-col items-center gap-1 p-2">
+        {store.guesses.map((_, i) => (
+          <WordGrid
+            word={store.word}
+            guess={store.guesses[i]}
+            isGuessed={i < store.numberOfGuesses}
+            key={i}
+          />
+        ))}
+      </div>
+
+      {(store.won || store.lost) && resultReady && !resultDismissed && (
+        <ModalBackdrop onClick={() => setResultDismissed(true)}>
+          <ResultModal
+            gameName="Wordle"
+            icon={<WordleCompletionIcon />}
+            title={store.won ? "You won!" : "Almost!"}
+            message={
+              store.won ? (
+                "You guessed today's word."
+              ) : (
+                <>
+                  The word was{" "}
+                  <strong className="font-bold text-tile-correct">
+                    {store.word}
+                  </strong>
+                  .
+                </>
+              )
+            }
+            score={Math.round(store.totalScore)}
+            guesses={store.numberOfGuesses}
+            footerNote={store.won ? "Nice work." : "Better luck next time."}
+            onClose={() => setResultDismissed(true)}
+            onPlayAgain={() => {
+              store.startGame();
+              setResultDismissed(false);
+            }}
+          />
+        </ModalBackdrop>
       )}
-      {(store.lost || store.won) && (
-        <>
-          <button className="mt-2 btn-primary" onClick={store.startGame}>
-            Play again
-          </button>
-        </>
-      )}
-      <Keyboard store={store} />
-      <div className="delay-delay3"></div>
-      <div className="delay-delay2"></div>
-      <div className="delay-delay1"></div>
-      <div className="delay-delay0"></div>
-    </div>
+
+      {keyboardVisible && <Keyboard store={store} />}
+    </GameShell>
   );
 };
 

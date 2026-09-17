@@ -34,7 +34,7 @@ const UserInfoModal = ({ onClick, userInfo }) => {
   }, [userInfo]);
 
   return (
-    <div className="absolute flex flex-col w-2/3 shadow-xl left-0 right-0 m-auto p-8 space-y-4 justify-evenly md:w-1/2 rounded-xl bg-lightest dark:bg-darker">
+    <div className="flex flex-col w-[90vw] max-w-md shadow-xl p-8 space-y-4 justify-evenly rounded-xl bg-lightest dark:bg-darker">
       <div className="flex justify-between">
         <h1 className="heading-1">Information</h1>
         <button className="heading-1" onClick={onClick}>

@@ -90,7 +90,7 @@ const SignIn = ({ callbackUrl, providers }: SignInProps) => {
               type="email"
               value={signInEmail}
               onChange={(e) => setSignInEmail(e.target.value)}
-              className="p-3 text-sm rounded-xl bg-gray-100 dark:bg-dark"
+              className="p-3 text-sm rounded-xl bg-surface-secondary"
               placeholder="Email"
               required
             />
@@ -99,13 +99,13 @@ const SignIn = ({ callbackUrl, providers }: SignInProps) => {
               type="password"
               value={signInPassword}
               onChange={(e) => setSignInPassword(e.target.value)}
-              className="p-3 text-sm rounded-xl bg-gray-100 dark:bg-dark"
+              className="p-3 text-sm rounded-xl bg-surface-secondary"
               placeholder="Password"
               required
             />
             <button
               type="submit"
-              className="w-full py-3 mt-3 text-sm text-white bg-purple-600 rounded-xl hover:bg-purple-700"
+              className="w-full py-3 mt-3 text-sm text-on-primary bg-action-primary rounded-xl hover:bg-action-primary-hover"
             >
               Log in
             </button>
@@ -117,7 +117,7 @@ const SignIn = ({ callbackUrl, providers }: SignInProps) => {
               type="text"
               value={signUpName}
               onChange={(e) => setSignUpName(e.target.value)}
-              className="p-3 text-sm rounded-xl bg-gray-100 dark:bg-dark"
+              className="p-3 text-sm rounded-xl bg-surface-secondary"
               placeholder="Name"
             />
             <input
@@ -125,7 +125,7 @@ const SignIn = ({ callbackUrl, providers }: SignInProps) => {
               type="email"
               value={signUpEmail}
               onChange={(e) => setSignUpEmail(e.target.value)}
-              className="p-3 text-sm rounded-xl bg-gray-100 dark:bg-dark"
+              className="p-3 text-sm rounded-xl bg-surface-secondary"
               placeholder="Email"
               required
             />
@@ -134,14 +134,14 @@ const SignIn = ({ callbackUrl, providers }: SignInProps) => {
               type="password"
               value={signUpPassword}
               onChange={(e) => setSignUpPassword(e.target.value)}
-              className="p-3 text-sm rounded-xl bg-gray-100 dark:bg-dark"
+              className="p-3 text-sm rounded-xl bg-surface-secondary"
               placeholder="Password"
               minLength={8}
               required
             />
             <button
               type="submit"
-              className="w-full py-3 mt-3 text-sm text-white bg-purple-600 rounded-xl hover:bg-purple-700"
+              className="w-full py-3 mt-3 text-sm text-on-primary bg-action-primary rounded-xl hover:bg-action-primary-hover"
             >
               Create account
             </button>
@@ -157,7 +157,7 @@ const SignIn = ({ callbackUrl, providers }: SignInProps) => {
                   callbackUrl,
                 })
               }
-              className="w-full py-2.5 text-sm border rounded-xl dark:border-gray-600"
+              className="w-full py-2.5 text-sm border border-border-subtle rounded-xl"
             >
               {mode === "signin" ? "Log in" : "Create account"} with{" "}
               {provider.name}

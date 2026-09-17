@@ -7,66 +7,22 @@ import { useTheme } from "next-themes";
 import { HiSun, HiMoon, HiMenu, HiX } from "react-icons/hi";
 import { useRouter } from "next/router";
 
+const PLAY_MENU_ID = "play-dropdown-menu";
+
 const Header = () => {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const { data: session } = useSession();
 
   // Mobile menu
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
- 
-  const mobileMenu = () => {
-    return (
-      <div className="flex flex-col w-full text-center lg:hidden">
-        {React.Children.toArray(
-          navLinks.map((link) => (
-            <>
-              {link.dropdown === true ? (
-                <>
-                  <div
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex py-6 space-x-3 text-xl border-t cursor-pointer center"
-                  >
-                    <div>{link.name}</div>
-                  </div>
-                  {dropdownOpen ? dropdown() : ""}
-                </>
-              ) : (
-                <>
-                  <Link
-                    onClick={() => setMobileMenuOpen(false)}
-                    href={link.path}
-                    className="py-6 text-xl border-t"
-                  >
-                    {link.name}
-                  </Link>
-                </>
-              )}
-            </>
-          ))
-        )}
-        {session ? (
-          <button
-            className="flex py-6 space-x-3 text-xl text-gray-400 cursor-pointer center border-y"
-            onClick={() => signOut()}
-          >
-            Sign out
-          </button>
-        ) : (
-          <button
-            className="flex py-6 space-x-3 text-xl text-gray-400 cursor-pointer center border-y"
-            onClick={() => signIn()}
-          >
-            Sign in
-          </button>
-        )}
-      </div>
-    );
-  };
 
   // Dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const closeDropdownTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const playTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobilePlayTriggerRef = useRef<HTMLButtonElement>(null);
 
   const openDropdown = () => {
     if (closeDropdownTimeout.current) {
@@ -87,24 +43,201 @@ const Header = () => {
     }, delay);
   };
 
-  const dropdown = () => {
+  const getMenuItems = () =>
+    Array.from(
+      menuRef.current?.querySelectorAll<HTMLAnchorElement>('[role="menuitem"]') ?? []
+    );
+
+  const focusMenuItem = (index: number) => {
+    const items = getMenuItems();
+    if (items.length === 0) return;
+    const nextIndex = ((index % items.length) + items.length) % items.length;
+    items[nextIndex]?.focus();
+  };
+
+  const handleMenuKeyDown = (event: React.KeyboardEvent) => {
+    const items = getMenuItems();
+    if (items.length === 0) return;
+    const currentIndex = items.indexOf(document.activeElement as HTMLAnchorElement);
+
+    switch (event.key) {
+      case "ArrowDown":
+        event.preventDefault();
+        focusMenuItem(currentIndex + 1);
+        break;
+      case "ArrowUp":
+        event.preventDefault();
+        focusMenuItem(currentIndex - 1);
+        break;
+      case "Home":
+        event.preventDefault();
+        focusMenuItem(0);
+        break;
+      case "End":
+        event.preventDefault();
+        focusMenuItem(items.length - 1);
+        break;
+      case "Escape":
+        event.preventDefault();
+        if (closeDropdownTimeout.current) {
+          clearTimeout(closeDropdownTimeout.current);
+          closeDropdownTimeout.current = null;
+        }
+        setDropdownOpen(false);
+        playTriggerRef.current?.focus();
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Close on outside click, and move focus into the menu when it opens.
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    focusMenuItem(0);
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        menuRef.current?.contains(target) ||
+        playTriggerRef.current?.contains(target) ||
+        mobilePlayTriggerRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setDropdownOpen(false);
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dropdownOpen]);
+
+  const dropdown = (variant: "desktop" | "mobile" = "desktop") => {
     return (
       <div
-        className="flex flex-col border bg-white/80 dark:bg-dark/80 lg:w-36 lg:rounded-xl"
-        onMouseEnter={openDropdown}
-        onMouseLeave={() => closeDropdown()}
+        ref={menuRef}
+        id={PLAY_MENU_ID}
+        role="menu"
+        aria-label="Play games"
+        onKeyDown={handleMenuKeyDown}
+        onMouseEnter={variant === "mobile" ? undefined : openDropdown}
+        onMouseLeave={variant === "mobile" ? undefined : () => closeDropdown()}
+        onBlur={(event) => {
+          const nextFocus = event.relatedTarget as Node | null;
+          if (
+            nextFocus &&
+            (menuRef.current?.contains(nextFocus) ||
+              playTriggerRef.current?.contains(nextFocus) ||
+              mobilePlayTriggerRef.current?.contains(nextFocus))
+          ) {
+            return;
+          }
+          setDropdownOpen(false);
+        }}
+        className={`w-full overflow-hidden lg:w-max ${
+          variant === "mobile"
+            ? ""
+            : "rounded-b-2xl bg-nav-background shadow-[var(--nav-shadow)]"
+        }`}
       >
         {React.Children.toArray(
-          games.map((link) => (
-            <Link
-              onClick={() => setDropdownOpen(false)}
-              onMouseEnter={openDropdown}
-              href={link.path}
-              className="p-3 border-b hover:bg-lightest/60 last:border-b-0 hover:first:rounded-t-xl hover:last:rounded-b-xl hover:dark:bg-darker"
-            >
-              <div onClick={() => setMobileMenuOpen(false)}>{link.name}</div>
-            </Link>
+          games.map((link) => {
+            const isCurrent = router.pathname === link.path;
+            return (
+              <Link
+                href={link.path}
+                role="menuitem"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  setMobileMenuOpen(false);
+                }}
+                className={`flex h-11 items-center gap-8 whitespace-nowrap px-5 text-sm font-medium transition-colors duration-150 active:opacity-80 ${
+                  variant === "mobile"
+                    ? "justify-center bg-nav-interactive text-nav-interactive-text hover:bg-nav-background hover:text-nav-text focus-visible:bg-nav-background focus-visible:text-nav-text active:bg-nav-background active:text-nav-text"
+                    : `justify-between ${
+                        isCurrent
+                          ? "text-nav-interactive"
+                          : "text-nav-text hover:text-nav-interactive focus-visible:text-nav-interactive"
+                      }`
+                }`}
+              >
+                <span>{link.name}</span>
+                {variant === "mobile" ? null : (
+                  <span aria-hidden="true">&rarr;</span>
+                )}
+              </Link>
+            );
+          })
+        )}
+      </div>
+    );
+  };
+
+  const mobileMenu = () => {
+    return (
+      <div
+        className="fixed inset-x-4 bottom-4 z-40 overflow-y-auto rounded-b-[20px] bg-nav-background text-center shadow-[var(--nav-shadow)] sm:inset-x-6 lg:hidden"
+        style={{ top: "calc(env(safe-area-inset-top) + 5rem)" }}
+      >
+        {React.Children.toArray(
+          navLinks.map((link) => (
+            <>
+              {link.dropdown === true ? (
+                <>
+                  <button
+                    type="button"
+                    ref={mobilePlayTriggerRef}
+                    aria-haspopup="menu"
+                    aria-expanded={dropdownOpen}
+                    aria-controls={PLAY_MENU_ID}
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className={`flex w-full items-center justify-center gap-3 py-6 text-xl cursor-pointer transition-colors duration-150 active:opacity-80 ${
+                      dropdownOpen
+                        ? "text-nav-interactive"
+                        : "hover:text-nav-interactive"
+                    }`}
+                  >
+                    <div>{link.name}</div>
+                  </button>
+                  {dropdownOpen ? (
+                    <div className="pb-4">{dropdown("mobile")}</div>
+                  ) : (
+                    ""
+                  )}
+                </>
+              ) : (
+                <>
+                  <Link
+                    onClick={() => setMobileMenuOpen(false)}
+                    href={link.path}
+                    className={`flex items-center justify-center py-6 text-xl transition-colors duration-150 active:opacity-80 ${
+                      router.pathname === link.path
+                        ? "text-nav-interactive"
+                        : "hover:text-nav-interactive"
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                </>
+              )}
+            </>
           ))
+        )}
+        {session ? (
+          <button
+            className="flex w-full items-center justify-center gap-3 py-6 text-xl text-secondary cursor-pointer transition-colors duration-150 hover:text-nav-interactive"
+            onClick={() => signOut()}
+          >
+            Sign out
+          </button>
+        ) : (
+          <button
+            className="flex w-full items-center justify-center gap-3 py-6 text-xl text-secondary cursor-pointer transition-colors duration-150 hover:text-nav-interactive"
+            onClick={() => signIn()}
+          >
+            Sign in
+          </button>
         )}
       </div>
     );
@@ -122,25 +255,42 @@ const Header = () => {
   }, []);
   if (!mounted) return null;
 
+  const pillBase =
+    "flex items-center justify-center h-10 px-5 rounded-full text-sm font-medium transition-colors duration-[160ms] ease-in-out active:opacity-80";
+
   return (
-    <div>
-      <nav className="flex items-center justify-between py-8">
+    <div className="relative">
+      {mobileMenuOpen && (
+        <div
+          aria-hidden="true"
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 z-30 bg-canvas lg:hidden"
+        />
+      )}
+      <nav
+        className={`relative z-50 mx-0 mt-4 flex h-16 items-center justify-between bg-nav-background px-6 text-nav-text ${
+          mobileMenuOpen ? "rounded-t-[20px]" : "rounded-[20px]"
+        }`}
+      >
         <div className="w-1/5">
-          <Link href="/">
-            {theme === "light" ? (
-              <Image src="/logo-light.png" alt="logo-light" width={100} height={100}/>
+          <Link href="/" className="inline-flex rounded-full">
+            {/* The nav is a light neutral surface in light theme and a
+                dark aubergine surface in dark theme, so the wordmark
+                swaps the same way the page background would. */}
+            {resolvedTheme === "light" ? (
+              <Image src="/logo-light.png" alt="Fimla" width={113} height={32} />
             ) : (
-              <Image src="/logo-dark.png" alt="logo-dark" width={100} height={100} />
+              <Image src="/logo-dark.png" alt="Fimla" width={113} height={32} />
             )}
           </Link>
         </div>
 
         <div
-          className="relative items-center hidden w-3/5 justify-evenly lg:flex"
+          className="relative items-center hidden gap-2 lg:flex"
           onMouseLeave={() => closeDropdown()}
         >
           <div
-            className="absolute left-12 top-8 z-10 pt-4"
+            className="absolute left-0 top-full z-10 mt-2"
             onMouseEnter={openDropdown}
             onMouseLeave={() => closeDropdown()}
           >
@@ -150,35 +300,37 @@ const Header = () => {
             navLinks.map((link) => {
               const active =
                 router.pathname === link.path
-                  ? "bg-black dark:bg-white"
-                  : "bg-transparent";
+                  ? "bg-nav-interactive text-nav-interactive-text"
+                  : "bg-nav-item text-nav-text hover:bg-nav-interactive hover:text-nav-interactive-text";
+              // Being on a /games page OR having the dropdown open both
+              // count as "Play is active" - same lavender pill either
+              // way, so opening the menu never dims it to a different color.
               const playActive =
                 router.pathname.includes("/games") || dropdownOpen
-                  ? "bg-black dark:bg-white"
-                  : "bg-transparent";
+                  ? "bg-nav-interactive text-nav-interactive-text"
+                  : "bg-nav-item text-nav-text hover:bg-nav-interactive hover:text-nav-interactive-text";
                 return (
                   <div>
                   {link.dropdown === true ? (
-                    <div
+                    <button
+                      type="button"
+                      ref={playTriggerRef}
+                      aria-haspopup="menu"
+                      aria-expanded={dropdownOpen}
+                      aria-controls={PLAY_MENU_ID}
                       onClick={() => setDropdownOpen(!dropdownOpen)}
                       onMouseEnter={openDropdown}
-                      className="flex space-x-3 cursor-pointer center"
+                      className={`${pillBase} ${playActive} cursor-pointer`}
                     >
-                      <div
-                        className={`${playActive} w-6 h-6 border border-black rounded-full dark:border-white`}
-                      ></div>
-                      <div>{link.name}</div>
-                    </div>
+                      {link.name}
+                    </button>
                   ) : (
                     <Link
-                      className="flex space-x-3 center"
                       href={link.path}
                       onMouseEnter={() => closeDropdown(0)}
+                      className={`${pillBase} ${active}`}
                     >
-                      <div
-                        className={`${active} w-6 h-6 border border-black rounded-full dark:border-white`}
-                      ></div>
-                      <div>{link.name}</div>
+                      {link.name}
                     </Link>
                   )}
                 </div>
@@ -188,16 +340,27 @@ const Header = () => {
         </div>
 
         <div className="flex justify-end w-1/5 gap-x-4">
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             {session ? (
-              <button onClick={() => signOut()}>Sign out</button>
+              <button
+                onClick={() => signOut()}
+                className="rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-150 hover:bg-nav-interactive hover:text-nav-interactive-text"
+              >
+                Sign out
+              </button>
             ) : (
-              <button onClick={() => signIn()}>Sign in</button>
+              <button
+                onClick={() => signIn()}
+                className="rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-150 hover:bg-nav-interactive hover:text-nav-interactive-text"
+              >
+                Sign in
+              </button>
             )}
           </div>
           <button
             aria-label="dark-mode"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            className="rounded-full p-2 transition-colors duration-150 hover:text-nav-interactive"
           >
             {theme === "light" ? <HiMoon /> : <HiSun />}
           </button>
@@ -207,7 +370,7 @@ const Header = () => {
             onClick={() => {
               setMobileMenuOpen(!mobileMenuOpen);
             }}
-            className="col-span-2 text-xl text-center lg:hidden"
+            className="col-span-2 rounded-full p-2 text-xl text-center transition-colors duration-150 hover:text-nav-interactive lg:hidden"
           >
             {mobileMenuOpen ? <HiX /> : <HiMenu />}
           </button>

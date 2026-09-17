@@ -1,9 +1,16 @@
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import React from "react";
 import { games } from "../data/paths";
 import Head from "next/head";
-import GameCard from "../components/GameCard";
+import GameCard, { GameCardVariant } from "../components/GameCard";
+import PageHeading from "../components/PageHeading";
+
+const CARD_VARIANTS: GameCardVariant[] = [
+  "wordle",
+  "quordle",
+  "spelling",
+  "crosswords",
+];
 
 export default function Home() {
   const { data: session } = useSession();
@@ -18,7 +25,6 @@ export default function Home() {
           Fimla - Íslenskir orðaleikir - Word games in Icelandic, play wordle,
           quordle, spelling bee and crosswords for free!
         </title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="all" />
         <meta
           name="description"
@@ -29,26 +35,22 @@ export default function Home() {
       </Head>
 
       {session && (
-        <section className="w-full mt-8 mb-2 lg:p-6">
-          <h1 className="heading-1">Hello, {displayName}</h1>
-          <p className="mt-1">Ready for today&apos;s games?</p>
-        </section>
+        <PageHeading
+          title={`Hello, ${displayName}`}
+          description="Ready for today's games?"
+        />
       )}
 
-      <section
-        className={`grid w-full gap-6 md:gap-3 lg:gap-6 lg:p-6 sm:grid-cols-2 grid-rows-auto ${
-          session ? "md:mt-0" : "md:mt-12"
-        }`}
-      >
+      <section className="grid w-full grid-cols-1 items-stretch gap-3 sm:grid-cols-2 sm:gap-6">
+
         {React.Children.toArray(
-          games.map((game) => (
-            <Link href={game.path}>
-              <GameCard
-                image={game.image}
-                title={game.name}
-                placeholderImg={game.placeholderImg}
-              />
-            </Link>
+          games.map((game, index) => (
+            <GameCard
+              number={String(index + 1).padStart(2, "0")}
+              title={game.name}
+              href={game.path}
+              variant={CARD_VARIANTS[index]}
+            />
           ))
         )}
       </section>

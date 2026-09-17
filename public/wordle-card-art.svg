@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370 280" role="img" aria-labelledby="title desc">
+  <title id="title">Wordle tiles</title>
+  <desc id="desc">Twenty separated tiles with purple, lavender, and pink accents.</desc>
+  <defs>
+    <rect id="tile" width="58" height="48" rx="5"/>
+  </defs>
+  <g transform="translate(-5 10)">
+    <use href="#tile" x="25" y="19" fill="#493a55"/><use href="#tile" x="93" y="19" fill="#eee8ff"/><use href="#tile" x="161" y="19" fill="#6d28d9"/><use href="#tile" x="229" y="19" fill="#493a55"/><use href="#tile" x="297" y="19" fill="#493a55"/>
+    <use href="#tile" x="25" y="77" fill="#f59ad3"/><use href="#tile" x="93" y="77" fill="#493a55"/><use href="#tile" x="161" y="77" fill="#493a55"/><use href="#tile" x="229" y="77" fill="#493a55"/><use href="#tile" x="297" y="77" fill="#493a55"/>
+    <use href="#tile" x="25" y="135" fill="#493a55"/><use href="#tile" x="93" y="135" fill="#7c3aed"/><use href="#tile" x="161" y="135" fill="#eee8ff"/><use href="#tile" x="229" y="135" fill="#493a55"/><use href="#tile" x="297" y="135" fill="#493a55"/>
+    <use href="#tile" x="25" y="193" fill="#493a55"/><use href="#tile" x="93" y="193" fill="#493a55"/><use href="#tile" x="161" y="193" fill="#493a55"/><use href="#tile" x="229" y="193" fill="#493a55"/><use href="#tile" x="297" y="193" fill="#493a55"/>
+  </g>
+</svg>
