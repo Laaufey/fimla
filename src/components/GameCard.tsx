@@ -36,7 +36,10 @@ const ART: Record<
     height: 290,
     sizeClassName: "sm:w-[115%]",
   },
-  crosswords: { src: "/crosswords-card-art.svg", width: 390, height: 300 },
+  // Uses its own black-tile art rather than the pink-tile version shown
+  // on the Crosswords "coming soon" page - the two are intentionally
+  // different, so they're separate files rather than a shared one.
+  crosswords: { src: "/crosswords-card-art-home.svg", width: 390, height: 300 },
 };
 
 type GameCardProps = {
