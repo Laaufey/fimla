@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370 280" role="img" aria-labelledby="title desc">
+  <title id="title">Crossword tiles</title>
+  <desc id="desc">Thirty separated crossword tiles in warm white and pink.</desc>
+  <defs>
+    <rect id="square" width="48" height="42" rx="4"/>
+  </defs>
+  <g>
+    <use href="#square" x="26" y="23" fill="#f7f5f0"/><use href="#square" x="80" y="23" fill="#f7f5f0"/><use href="#square" x="134" y="23" fill="#f7f5f0"/><use href="#square" x="188" y="23" fill="#f7f5f0"/><use href="#square" x="242" y="23" fill="#f7f5f0"/><use href="#square" x="296" y="23" fill="#f59ad3"/>
+    <use href="#square" x="26" y="71" fill="#f7f5f0"/><use href="#square" x="80" y="71" fill="#f7f5f0"/><use href="#square" x="134" y="71" fill="#f59ad3"/><use href="#square" x="188" y="71" fill="#f7f5f0"/><use href="#square" x="242" y="71" fill="#f7f5f0"/><use href="#square" x="296" y="71" fill="#f7f5f0"/>
+    <use href="#square" x="26" y="119" fill="#f7f5f0"/><use href="#square" x="80" y="119" fill="#f7f5f0"/><use href="#square" x="134" y="119" fill="#f7f5f0"/><use href="#square" x="188" y="119" fill="#f59ad3"/><use href="#square" x="242" y="119" fill="#f7f5f0"/><use href="#square" x="296" y="119" fill="#f7f5f0"/>
+    <use href="#square" x="26" y="167" fill="#f59ad3"/><use href="#square" x="80" y="167" fill="#f7f5f0"/><use href="#square" x="134" y="167" fill="#f7f5f0"/><use href="#square" x="188" y="167" fill="#f7f5f0"/><use href="#square" x="242" y="167" fill="#f7f5f0"/><use href="#square" x="296" y="167" fill="#f7f5f0"/>
+    <use href="#square" x="26" y="215" fill="#f59ad3"/><use href="#square" x="80" y="215" fill="#f7f5f0"/><use href="#square" x="134" y="215" fill="#f7f5f0"/><use href="#square" x="188" y="215" fill="#f59ad3"/><use href="#square" x="242" y="215" fill="#f59ad3"/><use href="#square" x="296" y="215" fill="#f59ad3"/>
+  </g>
+  <g fill="#24122f" font-family="Arial, sans-serif" font-size="12" font-weight="700">
+    <text x="31" y="37">1</text><text x="31" y="85">2</text><text x="31" y="133">3</text><text x="85" y="181">4</text><text x="85" y="229">5</text>
+  </g>
+</svg>

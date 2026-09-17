@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 280" role="img" aria-labelledby="title desc">
+  <title id="title">Spelling Bee cells</title>
+  <desc id="desc">Seven borderless, evenly spaced hexagons with a purple center.</desc>
+  <defs>
+    <polygon id="hex" points="-43,0 -21.5,-37.24 21.5,-37.24 43,0 21.5,37.24 -21.5,37.24"/>
+  </defs>
+  <g>
+    <use href="#hex" transform="translate(210 56.86)" fill="#c4b5fd"/>
+    <use href="#hex" transform="translate(138 98.43)" fill="#c4b5fd"/>
+    <use href="#hex" transform="translate(282 98.43)" fill="#c4b5fd"/>
+    <use href="#hex" transform="translate(210 140)" fill="#6d28d9"/>
+    <use href="#hex" transform="translate(138 181.57)" fill="#c4b5fd"/>
+    <use href="#hex" transform="translate(282 181.57)" fill="#c4b5fd"/>
+    <use href="#hex" transform="translate(210 223.14)" fill="#c4b5fd"/>
+  </g>
+</svg>

@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import LoadingIcon from "../components/LoadingIcon";
+import AuthPromptBanner from "../components/AuthPromptBanner";
+import PageHeading from "../components/PageHeading";
+import { buttonPrimary } from "../components/buttonStyles";
 import getByUserEmail from "../../lib/getByUserEmail";
 import updateData from "../../lib/updateData";
 
@@ -31,73 +34,90 @@ const Groups = () => {
   if (status === "loading") return <LoadingIcon isPage />;
 
   return (
-    <div className="flex flex-col items-center my-10 justify-evenly">
-      <h1 className="mb-5 heading-1">Create a group</h1>
-      <div className="flex flex-col justify-center w-4/5 p-6 rounded-md lg:w-3/4 lg:p-10 bg-lightest dark:bg-darker">
-        {session ? (
-          <>
-            <label className="border-b-[0.5px] pb-1 heading-2 mb-4">
-              Group Name
-            </label>
+    <div className="flex flex-col gap-6">
+      <PageHeading title="Groups" />
 
-            <div className="flex flex-col lg:flex-row justify-evenly">
+      {session ? (
+        <>
+          <div className="flex flex-col gap-4">
+            <h2 className="heading-2">Your groups</h2>
+
+            {userInTournament.length === 0 ? (
+              <p className="text-sm text-text-secondary">
+                You haven&apos;t joined or created any groups yet.
+              </p>
+            ) : (
+              userInTournament.map((o) => (
+                <Link
+                  key={o["tournamentId"]}
+                  href={{
+                    pathname: "/groups/[id]",
+                    query: { id: o["tournamentId"] },
+                  }}
+                  className="flex items-center justify-between gap-4 rounded-2xl bg-surface-secondary p-5 text-text-primary transition-colors duration-150 hover:bg-border-subtle sm:p-6"
+                >
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p className="truncate font-semibold">
+                      {o["tournamentName"]}
+                    </p>
+                    <p className="text-sm text-text-secondary">
+                      Open your group and see the leaderboard
+                    </p>
+                  </div>
+                  <span className={`${buttonPrimary} shrink-0`}>
+                    Open group <span aria-hidden="true">&rarr;</span>
+                  </span>
+                </Link>
+              ))
+            )}
+          </div>
+
+          <section className="flex w-full flex-col gap-4 rounded-3xl bg-surface-secondary p-6 sm:p-8">
+            <div className="flex flex-col gap-1">
+              <h2 className="font-display text-2xl font-extrabold tracking-tight-brand">
+                Create a group
+              </h2>
+              <p className="text-sm text-text-secondary">
+                Create a space to play and compare scores with friends.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 sm:max-w-sm">
+              <label
+                htmlFor="group-name"
+                className="text-sm font-medium text-text-secondary"
+              >
+                Group name
+              </label>
               <input
+                id="group-name"
                 type="text"
-                className="p-1 rounded-md lg:w-full lg:h-10 dark:bg-dark"
+                placeholder="Enter a group name"
+                className="h-11 w-full rounded-xl bg-surface px-4 text-sm text-text-primary placeholder:text-text-secondary sm:h-12"
                 onChange={(e) => setTournamentName(e.target.value)}
                 value={tournamentName}
               />
               <button
+                type="button"
                 onClick={createTournament}
-                className="h-10 px-4 mt-3 rounded-md lg:ml-4 lg:mt-0 bg-light dark:bg-dark"
+                className={`${buttonPrimary} mt-2 h-11 w-full sm:h-12 sm:w-fit`}
               >
-                Create
+                Create group <span aria-hidden="true">&rarr;</span>
               </button>
             </div>
-
-            <div className="flex flex-col mt-10">
-              <h1 className="border-b-[0.5px] pb-1 heading-2 mb-4">
-                Your groups
-              </h1>
-
-              {userInTournament.map((o, key) => (
-                <ul key={key}>
-                  <Link
-                    href={{
-                      pathname: "/groups/[id]",
-                      query: { id: o["tournamentId"] },
-                    }}
-                  >
-                    <li className="flex justify-between">
-                      <p>{o["tournamentName"]}</p>
-                      <button>Open</button>
-                    </li>
-                  </Link>
-                </ul>
-              ))}
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex flex-col items-center gap-4">
-              <h2 className="border-b-[0.5px] pb-1 heading-2">
-                Create your account in a few seconds
-              </h2>
-              <Link href="/api/auth/signin">
-                <button className="h-10 px-4 rounded-md bg-light dark:bg-dark">
-                  Get started
-                </button>
-              </Link>
-              <div className="flex flex-col items-center">
-                <p className="text-xs">Already have an account?</p>
-                <Link className="text-xs" href="/api/auth/signin">
-                  Sign in
-                </Link>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
+          </section>
+        </>
+      ) : (
+        <AuthPromptBanner
+          title="Create an account to start a group"
+          description="Sign up to create groups, invite friends and compare your scores."
+          primaryActionLabel="Create account"
+          primaryActionHref="/api/auth/signin"
+          secondaryText="Already have an account?"
+          secondaryActionLabel="Sign in"
+          secondaryActionHref="/api/auth/signin"
+        />
+      )}
     </div>
   );
 };

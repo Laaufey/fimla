@@ -2,6 +2,7 @@ import Footer from "./Footer";
 import Header from "./Header";
 import { useSession } from "next-auth/react";
 import UserNameModal from "./UserNameModal";
+import ModalBackdrop from "./ModalBackdrop";
 
 const Layout = ({ children }: any) => {
   const { data: session, status } = useSession();
@@ -9,16 +10,18 @@ const Layout = ({ children }: any) => {
     status === "authenticated" && !session?.user?.name;
 
   return (
-    <div className="mx-6 md:mx-20">
+    <div
+      className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-10"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
       <Header />
 
       {showUserNameModal ? (
-        <>
-          <div className="absolute z-10 top-0 bottom-0 left-0 right-0 bg-black bg-opacity-50"></div>
+        <ModalBackdrop>
           <UserNameModal />
-        </>
+        </ModalBackdrop>
       ) : null}
-      <div className="flex flex-col justify-around md:mx-20 lg:mx-36">
+      <div className="flex flex-col gap-10 pt-8">
         {children}
         <Footer />
       </div>

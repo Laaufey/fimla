@@ -53,6 +53,16 @@ export default {
       .filter((letter) => this.allGuessedLetters.includes(letter));
   },
 
+  // Whether the current row is a complete-length guess and the round
+  // hasn't already ended - used to enable/disable the on-screen Enter
+  // key. Actual word-list validity is still only known on submit.
+  get canSubmit() {
+    return (
+      !this.roundComplete &&
+      (this.currentGuess || "").length === this.word.length
+    );
+  },
+
   startGame() {
     // this.getWord();
     this.word = words[Math.round(Math.random() * words.length)];
@@ -87,13 +97,20 @@ export default {
       );
       return;
     }
-    if (!this.roundComplete && e.key.match(/^[a-z]$/)) {
+    if (
+      !this.roundComplete &&
+      e.key.match(/^[a-z]$/) &&
+      this.currentGuess.length < this.word.length
+    ) {
       this.guesses[this.numberOfGuesses] =
         this.currentGuess + e.key.toLowerCase();
     }
   },
 
   handleKeyClick(key) {
+    if (this.roundComplete) {
+      return;
+    }
     if (key === "enter") {
       return this.submitGuess();
     }
@@ -105,7 +122,7 @@ export default {
       );
       return;
     }
-    if (!this.roundComplete) {
+    if (this.currentGuess.length < this.word.length) {
       this.guesses[this.numberOfGuesses] =
         this.currentGuess + key.toLowerCase();
     }

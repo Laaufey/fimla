@@ -11,6 +11,7 @@ import WordGrid from "../../components/WordGrid";
 import Keyboard from "../../components/Keyboard";
 import WordleStore from "../../stores/WordleStore";
 import LoadingIcon from "../../components/LoadingIcon";
+import ModalBackdrop from "../../components/ModalBackdrop";
 import getByUserEmail from "../../../lib/getByUserEmail";
 import getById from "../../../lib/getById";
 import updateData from "../../../lib/updateData";
@@ -162,69 +163,61 @@ const Tournament = () => {
                   className="fixed flex items-center justify-center w-20 h-20 rounded-full shadow-md md:hidden bottom-3 right-3 bg-purple2"
                   onClick={() => showChat(true)}
                 >
-                  <HiOutlineChat className="text-6xl text-white" />
+                  <HiOutlineChat className="text-6xl text-warm-white" />
                 </button>
                 {modal ? (
-                  <div
-                    onClick={() => setModal(false)}
-                    className="fixed bottom-0 left-0 w-full h-full bg-black bg-opacity-75 "
-                  ></div>
-                ) : null}
-                {modal ? (
-                  <div className=" absolute top-0 left-0.5 right-0.5">
-                    <div className="flex flex-col items-center p-5 my-10 rounded-xl justify-evenly">
-                      <div className="flex flex-col items-center w-2/5 p-5 my-10 bg-white dark:bg-darker rounded-xl justify-evenly">
-                        <div className="flex items-center justify-between">
-                          <h1 className="heading-1">
-                            {tournament[0]?.["name"]}
-                          </h1>
-                          <button
-                            onClick={() => setModal(false)}
-                            className="heading-1"
-                          >
-                            <HiX />
-                          </button>
-                        </div>
-                        <h1 className="h-6 px-2 rounded-md text-error">
-                          {store.error}
+                  <ModalBackdrop onClick={() => setModal(false)}>
+                    <div className="flex flex-col items-center w-[90vw] max-w-md p-5 bg-surface rounded-xl justify-evenly">
+                      <div className="flex items-center justify-between">
+                        <h1 className="heading-1">
+                          {tournament[0]?.["name"]}
                         </h1>
-                        {store.guesses.map((_, i) => (
-                          <WordGrid
-                            word={store.word}
-                            guess={store.guesses[i]}
-                            isGuessed={i < store.numberOfGuesses}
-                            key={i}
-                          />
-                        ))}
-
-                        {store.won && (
-                          <h1 className="text-lg font-bold">
-                            You won! You are good!
-                          </h1>
-                        )}
-                        {store.lost && (
-                          <div className="flex items-center my-2 gap-x-8">
-                            <p className="text-lg font-bold">
-                              Almost! The correct word was:
-                            </p>
-                            <div>
-                              <p className="text-lg font-bold text-green">
-                                {store.word}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        {(store.lost || store.won) && (
-                          <>
-                            <button onClick={store.startGame}>
-                              Play again
-                            </button>
-                          </>
-                        )}
-                        <Keyboard store={store} />
+                        <button
+                          onClick={() => setModal(false)}
+                          className="heading-1"
+                        >
+                          <HiX />
+                        </button>
                       </div>
+                      <h1 className="h-6 px-2 rounded-md text-error">
+                        {store.error}
+                      </h1>
+                      {store.guesses.map((_, i) => (
+                        <WordGrid
+                          word={store.word}
+                          guess={store.guesses[i]}
+                          isGuessed={i < store.numberOfGuesses}
+                          key={i}
+                        />
+                      ))}
+
+                      {store.won && (
+                        <h1 className="text-lg font-bold">
+                          You won! You are good!
+                        </h1>
+                      )}
+                      {store.lost && (
+                        <div className="flex items-center my-2 gap-x-8">
+                          <p className="text-lg font-bold">
+                            Almost! The correct word was:
+                          </p>
+                          <div>
+                            <p className="text-lg font-bold text-green">
+                              {store.word}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      {(store.lost || store.won) && (
+                        <>
+                          <button onClick={store.startGame}>
+                            Play again
+                          </button>
+                        </>
+                      )}
+                      <Keyboard store={store} />
                     </div>
-                  </div>
+                  </ModalBackdrop>
                 ) : null}
                 <h1 className="mt-10 heading-1">{tournamentName}</h1>
                 <div className="flex flex-col">
@@ -246,7 +239,7 @@ const Tournament = () => {
                             />
                           </div>
                           <p>{user["userName"]}</p>
-                          <VscCircleFilled className="text-gray-300" />
+                          <VscCircleFilled className="text-text-secondary" />
                         </div>
                       ))}
                     </div>
@@ -275,7 +268,7 @@ const Tournament = () => {
 
                         <div
                           ref={divRef}
-                          className={`flex flex-col bg-white dark:bg-darker rounded-t-md p-5 items-end overflow-x-hidden h-48 overflow-y-auto`}
+                          className={`flex flex-col bg-surface rounded-t-md p-5 items-end overflow-x-hidden h-48 overflow-y-auto`}
                         >
                           {comments.map((user, i) => (
                             <div key={i}>

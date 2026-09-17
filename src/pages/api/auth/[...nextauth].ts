@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import type { Provider } from "next-auth/providers";
+import type { Provider } from "next-auth/providers/index";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
