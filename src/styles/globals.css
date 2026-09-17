@@ -1,28 +1,15 @@
+@import "./brand.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* @layer base {
-  @font-face {
-    font-family: "Apercu";
-    src: url("./fonts/apercu-light.woff2") format("woff2");
-  }
-} */
-/* @media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: #010409;
-  }
-} */
 
 html,
 body {
   padding: 0;
   margin: 0;
-  /* font-family: Apercu, sans-serif; */
+  background-color: var(--color-page-background);
+  color: var(--color-text-primary);
 }
 
 a {
@@ -35,15 +22,15 @@ a {
 }
 
 .heading-1 {
-  @apply text-4xl font-medium;
+  @apply text-4xl font-display font-extrabold tracking-tight-brand;
 }
 
 .heading-2 {
-  @apply text-2xl;
+  @apply text-2xl font-display font-bold;
 }
 
 .heading-3 {
-  @apply text-xl font-medium;
+  @apply text-xl font-display font-bold;
 }
 
 .center {
@@ -59,18 +46,36 @@ a {
 }
 
 .btn-primary {
-  @apply px-4 py-2 bg-purple-500 rounded-xl;
-  /* @apply px-4 py-2 bg-purple2 rounded-xl; */
+  @apply px-4 py-2 bg-action-primary text-on-primary rounded-xl;
 }
 .btn-primary-dis {
-  @apply px-4 py-2 bg-purple-500 bg-opacity-30 text-gray-400 cursor-not-allowed rounded-xl;
-  /* @apply px-4 py-2 bg-purple2 rounded-xl; */
+  @apply px-4 py-2 bg-action-primary bg-opacity-30 text-text-secondary cursor-not-allowed rounded-xl;
 }
 
 .btn-secondary {
-  @apply px-4 py-2 border border-black dark:border-white rounded-xl;
+  @apply px-4 py-2 border border-border-subtle rounded-xl;
 }
 
 .btn-secondary-dis {
-  @apply px-4 py-2 border cursor-not-allowed border-gray-400 dark:border-gray-400 text-gray-400 rounded-xl;
+  @apply px-4 py-2 border cursor-not-allowed border-border-subtle text-text-secondary rounded-xl;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

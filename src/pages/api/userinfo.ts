@@ -26,6 +26,7 @@ export default async function handler(
             username: body.userName,
             userDob: body.userDob,
             userLocation: body.userLocation,
+            wordGamePalette: body.wordGamePalette,
           },
         });
         return res.status(200).json(userInfo);
@@ -45,6 +46,7 @@ export default async function handler(
             username: body.userName,
             userDob: body.userDob,
             userLocation: body.userLocation,
+            wordGamePalette: body.wordGamePalette,
           },
         });
         return res.status(200).json(userInfo);

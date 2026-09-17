@@ -37,6 +37,23 @@ export default {
   get roundComplete() {
     return this.wonAll || this.currentGuess === 9;
   },
+
+  // The guess text shared by whichever boards are still active (not yet
+  // individually won) - every active board receives the exact same typed
+  // letters (see addLetterToGuess), so this only needs to read one of
+  // them. Used both to decide submit validity and to enable/disable the
+  // on-screen Enter key.
+  get activeGuess() {
+    return [
+      [this.won1, this.guesses[this.currentGuess]],
+      [this.won2, this.guesses2[this.currentGuess2]],
+      [this.won3, this.guesses3[this.currentGuess3]],
+      [this.won4, this.guesses4[this.currentGuess4]],
+    ].find(([won]) => !won)?.[1];
+  },
+  get canSubmit() {
+    return !this.roundComplete && (this.activeGuess || "").length === 5;
+  },
   get allGuessedLetters() {
     const guessed = (guesses, currentGuess) =>
       guesses.slice(0, currentGuess).join("").split("");
@@ -132,34 +149,44 @@ export default {
 
   submitGuess() {
     this.error = "";
-    if (words.includes(this.guesses[this.currentGuess])) {
-      this.currentGuess += 1;
-    }   
-    if (words.includes(this.guesses2[this.currentGuess2])) {
-      this.currentGuess2 += 1;
-    }
-    if (words.includes(this.guesses3[this.currentGuess3])) {
-      this.currentGuess3 += 1;
-    }
-    if (words.includes(this.guesses4[this.currentGuess4])) {
-      this.currentGuess4 += 1;
-    }
-    else {
+
+    // Every board that isn't already won receives the same typed guess
+    // (see addLetterToGuess), so validity only needs to be checked once
+    // against whichever board is still active - not decided by a single
+    // board. Previously the "else" here was only attached to board 4's
+    // `if`, so once board 4 was won first, its now-empty guess made every
+    // later valid guess wrongly show "Not a valid word".
+    const isValidGuess = words.includes(this.activeGuess);
+
+    if (isValidGuess) {
+      if (words.includes(this.guesses[this.currentGuess])) {
+        this.currentGuess += 1;
+      }
+      if (words.includes(this.guesses2[this.currentGuess2])) {
+        this.currentGuess2 += 1;
+      }
+      if (words.includes(this.guesses3[this.currentGuess3])) {
+        this.currentGuess3 += 1;
+      }
+      if (words.includes(this.guesses4[this.currentGuess4])) {
+        this.currentGuess4 += 1;
+      }
+    } else {
       this.error = "Not a valid word";
     }
+
     if (this.roundComplete) {
       console.log("Round Complete");
       this.handleStats();
     }
   },
 
-  addWordToGuessesArray(e, guesses, currentGuess, won) {
-    if (
-      guesses[currentGuess].length < 5 &&
-      e.key.match(/^[A-z]$/) &&
-      won === false
-    ) {
-      guesses[currentGuess] = guesses[currentGuess] + e.key.toLowerCase();
+  // Shared by both physical (handleKeyup) and on-screen (handleKeyClick)
+  // input - takes a plain letter rather than a keyboard event so both
+  // call sites can reuse it instead of duplicating this logic.
+  addLetterToGuess(guesses, currentGuess, won, key) {
+    if (guesses[currentGuess].length < 5 && won === false) {
+      guesses[currentGuess] = guesses[currentGuess] + key.toLowerCase();
     }
   },
 
@@ -186,17 +213,23 @@ export default {
       this.deleteLetter(this.guesses4, this.currentGuess4);
       return;
     }
-    this.addWordToGuessesArray(e, this.guesses, this.currentGuess, this.won1);
-    this.addWordToGuessesArray(e, this.guesses2, this.currentGuess2, this.won2);
-    this.addWordToGuessesArray(e, this.guesses3, this.currentGuess3, this.won3);
-    this.addWordToGuessesArray(e, this.guesses4, this.currentGuess4, this.won4);
+    if (!e.key.match(/^[A-z]$/)) {
+      return;
+    }
+    this.addLetterToGuess(this.guesses, this.currentGuess, this.won1, e.key);
+    this.addLetterToGuess(this.guesses2, this.currentGuess2, this.won2, e.key);
+    this.addLetterToGuess(this.guesses3, this.currentGuess3, this.won3, e.key);
+    this.addLetterToGuess(this.guesses4, this.currentGuess4, this.won4, e.key);
   },
 
   handleKeyClick(key) {
+    if (this.roundComplete) {
+      return;
+    }
     if (key === "enter") {
       return this.submitGuess();
     }
-    if (key === "delete") {      
+    if (key === "delete") {
       this.error = "";
       this.deleteLetter(this.guesses, this.currentGuess);
       this.deleteLetter(this.guesses2, this.currentGuess2);
@@ -204,10 +237,10 @@ export default {
       this.deleteLetter(this.guesses4, this.currentGuess4);
       return;
     }
-    if (this.guesses[this.currentGuess].length < 5) {
-      this.guesses[this.currentGuess] =
-        this.guesses[this.currentGuess] + key.toLowerCase();
-    }
+    this.addLetterToGuess(this.guesses, this.currentGuess, this.won1, key);
+    this.addLetterToGuess(this.guesses2, this.currentGuess2, this.won2, key);
+    this.addLetterToGuess(this.guesses3, this.currentGuess3, this.won3, key);
+    this.addLetterToGuess(this.guesses4, this.currentGuess4, this.won4, key);
   },
 
   handleStats() {

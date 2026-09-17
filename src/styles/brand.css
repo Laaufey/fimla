@@ -1,0 +1,316 @@
+/*
+  Fimla brand tokens — the single source of truth for every literal color
+  and font-family used anywhere in the app. See docs/brand.md for the full
+  audit. Application code (components, pages, Tailwind config, inline SVGs)
+  must reference the semantic custom properties below (or their Tailwind
+  class aliases in tailwind.config.js) — never a literal hex/rgb/hsl/named
+  color or a font-family string.
+
+  Structure:
+    1. Core palette  — the ONLY literal color values in the app (7 brand
+       colors + 2 functional game-feedback colors).
+    2. Semantic tokens (light) — everything else derives from the core
+       palette via direct reuse or `color-mix()`, never a new literal.
+    3. Semantic tokens (dark)  — `.dark` overrides for the tokens that
+       actually swap between themes.
+    4. Typography tokens.
+    5. Small utility classes for consumers that need a background-image
+       (gradients), kept flat/derived from the core palette.
+*/
+
+:root {
+  /* ---------------------------------------------------------------- */
+  /* 1. Core palette (~7 brand colors — do not add more without an     */
+  /*    explicit design decision to expand the palette)                */
+  /* ---------------------------------------------------------------- */
+  --core-ink: #0d0d0f; /* page ink / darkest background */
+  --core-aubergine: #24122f; /* deep aubergine surface */
+  --core-profile-purple: #4b3b63; /* muted profile purple (settings rail) */
+  --core-purple: #6d28d9; /* primary vivid purple */
+  --core-lavender: #c4b5fd; /* pale lavender */
+  --core-pink: #f59ad3; /* restrained pink */
+  --core-warm-white: #f7f5f0; /* warm off-white */
+  --core-white: #ffffff; /* plain white - the light-theme page canvas and
+    the neutral base for the letter-tile/nav gray (not warm-tinted) */
+
+  /* Functional colors — a separate, deliberately tiny palette. These
+     carry meaning (game correctness, form/API error text), not brand
+     decoration, so they're kept apart from the 7 brand colors above
+     rather than merged into them. */
+  --core-feedback-correct: #17b787;
+  --core-feedback-present: #efc64a;
+  --core-error: #ff5454;
+
+  /* The "Classic" word-game result palette reuses these same two colors
+     for correct/present (see the `[data-palette="classic"]` block below) -
+     no additional literals are needed for it. Absent/wrong stays the same
+     neutral gray as the Fimla palette in both cases. */
+
+  /* ---------------------------------------------------------------- */
+  /* 2. Semantic tokens — light theme                                  */
+  /* ---------------------------------------------------------------- */
+  --color-page-background: var(--core-white);
+  --color-surface-primary: var(--core-warm-white);
+  --color-surface-secondary: color-mix(
+    in srgb,
+    var(--core-white) 92%,
+    var(--core-ink) 8%
+  );
+  --color-profile: var(--core-profile-purple);
+  --color-action-primary: var(--core-purple);
+  --color-action-primary-hover: color-mix(
+    in srgb,
+    var(--core-purple) 85%,
+    var(--core-warm-white) 15%
+  );
+  --color-on-action-primary: var(--core-warm-white);
+  --color-accent-lavender: var(--core-lavender);
+  --color-accent-pink: var(--core-pink);
+  --color-text-primary: var(--core-ink);
+  --color-text-secondary: color-mix(
+    in srgb,
+    var(--core-ink) 58%,
+    var(--core-warm-white) 42%
+  );
+  --color-text-inverse: var(--core-warm-white);
+  --color-border-subtle: color-mix(
+    in srgb,
+    var(--core-ink) 14%,
+    var(--core-warm-white) 86%
+  );
+  --color-focus: var(--core-purple);
+  --color-danger-surface: color-mix(
+    in srgb,
+    var(--core-pink) 18%,
+    var(--core-warm-white) 82%
+  );
+  --color-danger-action: var(--core-pink);
+  --color-danger-action-text: var(--core-ink);
+  --color-overlay: color-mix(in srgb, var(--core-ink) 50%, transparent);
+  --color-surface-lavender-tint: color-mix(
+    in srgb,
+    var(--core-lavender) 25%,
+    var(--core-warm-white) 75%
+  );
+
+  /* Floating navigation — a calm neutral surface (the same family as
+     --color-surface-secondary), not a brand color. Dark aubergine text.
+     Hover, active/current, an open dropdown trigger, and a dropdown's
+     current-destination row all share ONE lavender/aubergine interaction
+     pair (--nav-interactive-*) rather than each getting its own shade -
+     this is intentional, not an oversight: there must be exactly one
+     highlight color for every "this is engaged" nav/tab state, see
+     docs/brand.md */
+  --nav-background: var(--color-surface-secondary);
+  --nav-border: color-mix(
+    in srgb,
+    var(--core-lavender) 32%,
+    var(--core-warm-white) 68%
+  );
+  --nav-text: var(--core-aubergine);
+  --nav-text-muted: color-mix(
+    in srgb,
+    var(--core-ink) 55%,
+    var(--core-warm-white) 45%
+  );
+  --nav-item-background: transparent;
+  --nav-interactive-background: var(--core-lavender);
+  --nav-interactive-text: var(--core-aubergine);
+  --nav-focus: var(--core-purple);
+  --nav-shadow: 0 10px 28px color-mix(in srgb, var(--core-aubergine) 12%, transparent);
+
+  /* Stat card gradients (Stats page only — kept as gradients there,
+     unlike the flat Play cards below) */
+  --gradient-purple: linear-gradient(
+    135deg,
+    var(--core-purple) 0%,
+    color-mix(in srgb, var(--core-purple) 80%, var(--core-lavender) 20%) 100%
+  );
+  --gradient-aubergine: linear-gradient(
+    135deg,
+    var(--core-aubergine) 0%,
+    color-mix(in srgb, var(--core-aubergine) 80%, var(--core-profile-purple) 20%) 100%
+  );
+  --gradient-lavender: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--core-lavender) 15%, var(--core-warm-white) 85%) 0%,
+    color-mix(in srgb, var(--core-lavender) 55%, var(--core-warm-white) 45%) 100%
+  );
+  --gradient-pink: linear-gradient(
+    135deg,
+    var(--core-pink) 0%,
+    color-mix(in srgb, var(--core-pink) 70%, var(--core-warm-white) 30%) 100%
+  );
+
+  /* Play page game cards — flat, no gradient */
+  --play-card-wordle-bg: var(--core-aubergine);
+  --play-card-quordle-bg: color-mix(in srgb, var(--core-lavender) 70%, var(--core-purple) 30%);
+  --play-card-spelling-bg: var(--color-surface-lavender-tint);
+  --play-card-crosswords-bg: var(--core-pink);
+
+  /* Stat card icon graphics (fixed identity, see docs/brand.md) */
+  --stat-icon-strong: var(--core-purple);
+  --stat-icon-vivid: color-mix(in srgb, var(--core-purple) 85%, var(--core-lavender) 15%);
+  --stat-icon-medium: color-mix(in srgb, var(--core-lavender) 65%, var(--core-purple) 35%);
+  --stat-icon-soft: var(--core-lavender);
+  --stat-icon-pale: color-mix(in srgb, var(--core-lavender) 40%, var(--core-warm-white) 60%);
+  --stat-icon-contrast: var(--core-warm-white);
+  --stat-icon-line: color-mix(in srgb, currentColor 46%, transparent);
+
+  /* Game feedback (Spelling Bee correctness states) */
+  --color-feedback-correct: var(--core-feedback-correct);
+  --color-feedback-present: var(--core-feedback-present);
+  --color-error-text: var(--core-error);
+
+  /* ---------------------------------------------------------------- */
+  /* Word-game (Wordle/Quordle) tile + keyboard tokens.                 */
+  /* Palette-controlled by the `data-palette` attribute on <html>       */
+  /* (see useWordGamePalette) - "fimla" (default, defined here) or      */
+  /* "classic" (overridden further down). Not evaluated states (empty,  */
+  /* entered) are palette-invariant by design - only results change.    */
+  /* ---------------------------------------------------------------- */
+  --tile-empty-bg: color-mix(in srgb, var(--core-ink) 10%, var(--core-white) 90%);
+  --tile-entered-bg: color-mix(in srgb, var(--core-lavender) 30%, var(--core-white) 70%);
+  --tile-text-empty: var(--color-text-primary);
+  --tile-text-entered: var(--color-text-primary);
+
+  --tile-correct-bg: var(--core-purple);
+  --tile-present-bg: var(--core-pink);
+  --tile-absent-bg: color-mix(in srgb, var(--core-ink) 22%, var(--core-white) 78%);
+  --tile-text-correct: var(--core-warm-white);
+  --tile-text-present: var(--core-ink);
+  --tile-text-absent: var(--color-text-primary);
+
+  --key-bg: var(--tile-empty-bg);
+  --key-used-bg: var(--tile-absent-bg);
+  --key-text: var(--color-text-primary);
+
+  /* Legacy neutral scale — still referenced by class name (bg-lightest,
+     dark:bg-darker, etc.) across pages not yet migrated to the semantic
+     tokens above. Values are fully derived from the core palette; only
+     the *names* are legacy, not the source of truth for the color. */
+  --legacy-light: color-mix(in srgb, var(--core-ink) 20%, var(--core-warm-white) 80%);
+  --legacy-lighter: color-mix(in srgb, var(--core-ink) 12%, var(--core-warm-white) 88%);
+  --legacy-lightest: color-mix(in srgb, var(--core-ink) 5%, var(--core-warm-white) 95%);
+  --legacy-medium: color-mix(in srgb, var(--core-ink) 30%, var(--core-warm-white) 70%);
+  --legacy-mediumdark: color-mix(in srgb, var(--core-ink) 45%, var(--core-warm-white) 55%);
+  --legacy-dark: var(--core-aubergine);
+  --legacy-darker: color-mix(in srgb, var(--core-aubergine) 70%, var(--core-ink) 30%);
+  --legacy-darkest: var(--core-ink);
+  --legacy-background: var(--core-ink);
+  --legacy-purple2: color-mix(in srgb, var(--core-lavender) 60%, var(--core-purple) 40%);
+
+  /* ---------------------------------------------------------------- */
+  /* 4. Typography — the only place a font-family literal may appear   */
+  /*    outside next/font/google's loader call in _app.tsx             */
+  /* ---------------------------------------------------------------- */
+  /* --font-archivo / --font-inter are supplied by next/font/google in
+     _app.tsx, which is the one permitted exception: next/font requires
+     the font loader call itself to live in a module and expose CSS
+     variables, so the literal family names "Archivo"/"Inter" passed to
+     it there are a documented technical exception, not a duplicate. */
+  --font-display: var(--font-archivo), "Archivo", "Inter", system-ui,
+    sans-serif;
+  --font-body: var(--font-inter), "Inter", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-brand: var(--font-display);
+}
+
+.dark {
+  --color-page-background: var(--core-ink);
+  --color-surface-primary: var(--core-aubergine);
+  --color-surface-secondary: color-mix(
+    in srgb,
+    var(--core-aubergine) 85%,
+    var(--core-warm-white) 15%
+  );
+  --color-action-primary: var(--core-lavender);
+  --color-action-primary-hover: color-mix(
+    in srgb,
+    var(--core-lavender) 85%,
+    var(--core-purple) 15%
+  );
+  --color-on-action-primary: var(--core-ink);
+  --color-text-primary: var(--core-warm-white);
+  --color-text-secondary: color-mix(
+    in srgb,
+    var(--core-warm-white) 72%,
+    var(--core-ink) 28%
+  );
+  --color-text-inverse: var(--core-ink);
+  --color-border-subtle: color-mix(
+    in srgb,
+    var(--core-warm-white) 14%,
+    var(--core-ink) 86%
+  );
+  --color-focus: var(--core-lavender);
+  --color-danger-surface: color-mix(
+    in srgb,
+    var(--core-pink) 16%,
+    var(--core-aubergine) 84%
+  );
+  --color-overlay: color-mix(in srgb, var(--core-ink) 65%, transparent);
+
+  /* Dark theme nav: the same deep aubergine surface used elsewhere
+     (--color-surface-primary), warm off-white text. --nav-interactive-*
+     (hover/active/open/selected) stays the same lavender/aubergine pair
+     as light theme - it reads clearly on both a near-white and a near-
+     black nav, so it doesn't swap. --nav-border and --nav-shadow are
+     unused (the nav has neither anymore) but kept defined in case that
+     changes. */
+  --nav-background: var(--color-surface-primary);
+  --nav-text: var(--core-warm-white);
+  --nav-border: color-mix(in srgb, var(--core-profile-purple) 60%, var(--core-ink) 40%);
+  --nav-text-muted: color-mix(in srgb, var(--core-warm-white) 80%, var(--core-ink) 20%);
+  --nav-focus: var(--core-lavender);
+  --nav-shadow: 0 10px 28px color-mix(in srgb, var(--core-ink) 35%, transparent);
+
+  /* Slightly brighter so the four-bar Average Score graphic still reads
+     against the darker surface-secondary card background in dark mode. */
+  --stat-icon-medium: color-mix(in srgb, var(--core-lavender) 80%, var(--core-purple) 20%);
+
+  --legacy-dark: var(--core-aubergine);
+  --legacy-darker: color-mix(in srgb, var(--core-aubergine) 75%, var(--core-ink) 25%);
+
+  /* Word-game tiles - brighter, clearly-visible surfaces against the near
+     black dark-theme page background (this is the fix for empty tiles
+     blending into the page). */
+  --tile-empty-bg: color-mix(in srgb, var(--core-profile-purple) 55%, var(--core-warm-white) 10%);
+  --tile-entered-bg: color-mix(in srgb, var(--core-profile-purple) 75%, var(--core-warm-white) 18%);
+  --tile-correct-bg: var(--core-lavender);
+  --tile-present-bg: var(--core-pink);
+  --tile-absent-bg: color-mix(in srgb, var(--core-profile-purple) 45%, var(--core-ink) 55%);
+  --tile-text-correct: var(--core-ink);
+  --tile-text-present: var(--core-ink);
+
+  --key-bg: var(--tile-empty-bg);
+  --key-used-bg: var(--tile-absent-bg);
+}
+
+/* ---------------------------------------------------------------- */
+/* Classic word-game palette - overrides only correct/present with the   */
+/* app's existing green/yellow feedback colors. Absent/wrong stays the   */
+/* same neutral gray as Fimla in both palettes (not overridden here).    */
+/* ---------------------------------------------------------------- */
+[data-palette="classic"] {
+  --tile-correct-bg: var(--core-feedback-correct);
+  --tile-present-bg: var(--core-feedback-present);
+  --tile-text-correct: var(--core-ink);
+  --tile-text-present: var(--core-ink);
+}
+
+/* ---------------------------------------------------------------- */
+/* 5. Gradient utility classes (background-image), flat/derived only  */
+/* ---------------------------------------------------------------- */
+.bg-gradient-brand-purple {
+  background-image: var(--gradient-purple);
+}
+.bg-gradient-brand-aubergine {
+  background-image: var(--gradient-aubergine);
+}
+.bg-gradient-brand-lavender {
+  background-image: var(--gradient-lavender);
+}
+.bg-gradient-brand-pink {
+  background-image: var(--gradient-pink);
+}

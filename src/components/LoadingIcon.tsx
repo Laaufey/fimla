@@ -42,7 +42,7 @@ const LoadingIcon = ({ isPage }) => {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="w-4 h-4 bg-purple-400 rounded-full"
+          className="w-4 h-4 bg-action-primary rounded-full"
         />
         <motion.span
           variants={loadingCircleVariants}
@@ -52,7 +52,7 @@ const LoadingIcon = ({ isPage }) => {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="w-4 h-4 bg-purple-400 rounded-full"
+          className="w-4 h-4 bg-action-primary rounded-full"
         />
         <motion.span
           variants={loadingCircleVariants}
@@ -62,7 +62,7 @@ const LoadingIcon = ({ isPage }) => {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="w-4 h-4 bg-purple-400 rounded-full"
+          className="w-4 h-4 bg-action-primary rounded-full"
         />
       </motion.div>
     </div>

@@ -4,10 +4,21 @@ import Image from "next/image";
 
 import ProfilePicModal from "../../components/ProfilePicModal";
 import UserInfoModal from "../../components/UserInfoModal";
+import ModalBackdrop from "../../components/ModalBackdrop";
+import ConfirmModal from "../../components/ConfirmModal";
 import LoadingIcon from "../../components/LoadingIcon";
+import AuthPromptBanner from "../../components/AuthPromptBanner";
+import PageHeading from "../../components/PageHeading";
+import { buttonPrimary, buttonSecondary, buttonDestructive, buttonQuiet } from "../../components/buttonStyles";
 import getByUserEmail from "../../../lib/getByUserEmail";
 import deleteData from "../../../lib/deleteData";
-import Link from "next/link";
+
+const DetailRow = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex items-center justify-between gap-4 py-3">
+    <p className="text-sm text-text-secondary">{label}</p>
+    <p className="truncate font-medium text-text-primary">{value}</p>
+  </div>
+);
 
 const Settings = () => {
   const { data: session, status } = useSession();
@@ -18,6 +29,8 @@ const Settings = () => {
   const [changeProfilePic, showProfilePicModal] = useState(false);
   const [changeInfo, showInfoModal] = useState(false);
   const [imageSrc, setImageSrcReady] = useState("");
+  const [confirmResetStats, setConfirmResetStats] = useState(false);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
 
   const defaultProfilePic =
     "https://res.cloudinary.com/diczrtchl/image/upload/v1673611647/figma-profile-pics/a5gyee4oj1tlk9edfzlv.png";
@@ -70,136 +83,172 @@ const Settings = () => {
 
   return (
     <div className="flex flex-col gap-y-4">
-      <h1 className="my-10 heading-1">Settings</h1>
-      <div className="flex flex-col w-full gap-6 p-6 rounded-md lg:grid lg:grid-cols-2">
-        {session ? (
-          <>
-            {changeProfilePic && (
-              <ProfilePicModal
-                setImageSrcReady={setImageSrcReady}
-                closeModal={() => showProfilePicModal(false)}
-              />
-            )}
-            {changeInfo && (
-              <UserInfoModal
-                onClick={() => showInfoModal(false)}
-                userInfo={userInfo}
-              />
-            )}
-            <div className="col-span-2">
-              <h1 className="text-center heading-1">
-                Hey {session.user?.name}
-              </h1>
-            </div>
-            <div className="grid justify-center col-start-2 row-start-2 p-4">
-              <div className="flex flex-col gap-6">
-                <div className="w-56 h-56 overflow-hidden rounded-full shadow-lg ">
+      <PageHeading title="Settings" />
+
+      {session ? (
+        <>
+          {(changeProfilePic ||
+            changeInfo ||
+            confirmResetStats ||
+            confirmDeleteAccount) && (
+            <ModalBackdrop>
+              {changeProfilePic && (
+                <ProfilePicModal
+                  setImageSrcReady={setImageSrcReady}
+                  closeModal={() => showProfilePicModal(false)}
+                />
+              )}
+              {changeInfo && (
+                <UserInfoModal
+                  onClick={() => showInfoModal(false)}
+                  userInfo={userInfo}
+                />
+              )}
+              {confirmResetStats && (
+                <ConfirmModal
+                  title="Reset your stats?"
+                  description="Clear your stats and game history"
+                  confirmLabel="Reset stats"
+                  variant="danger"
+                  onCancel={() => setConfirmResetStats(false)}
+                  onConfirm={() => {
+                    deleteStats(userEmail);
+                    setConfirmResetStats(false);
+                  }}
+                />
+              )}
+              {confirmDeleteAccount && (
+                <ConfirmModal
+                  title="Delete your account?"
+                  description="This action cannot be undone"
+                  confirmLabel="Delete account"
+                  variant="danger"
+                  onCancel={() => setConfirmDeleteAccount(false)}
+                  onConfirm={() => {
+                    deleteUser(userEmail);
+                    setConfirmDeleteAccount(false);
+                  }}
+                />
+              )}
+            </ModalBackdrop>
+          )}
+
+          <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+            {/* Profile summary */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl">
                   <Image
                     src={profilePic}
-                    width={400}
-                    height={400}
+                    width={128}
+                    height={128}
                     placeholder="blur"
                     blurDataURL="/user.png"
-                    alt="image"
+                    alt=""
+                    className="h-full w-full object-cover"
                     priority
                   />
                 </div>
-                <button
-                  className="self-center w-1/2 btn-primary"
-                  onClick={() => showProfilePicModal(true)}
-                >
-                  Edit
-                </button>
-              </div>
-            </div>
-            <div className="grid col-start-1 h-full row-start-2 p-4 bg-white rounded-md shadow-md dark:bg-darker">
-              <h2 className="border-b-[0.5px] h-10 pb-1 heading-2">About Me</h2>
-              <div className="flex flex-col">
-                {userInfo?.["username"] !== null && (
-                  <>
-                    <p className="mt-2 ml-1 text-xs text-gray-400">Name</p>
-                    <p className="h-10 p-2 mb-1">{userInfo?.["username"]}</p>
-                  </>
-                )}
-                {userInfo?.["userLocation"] !== null && (
-                  <>
-                    <p className="ml-1 text-xs text-gray-400">Location</p>
-                    <p className="h-10 p-2 mb-1">
-                      {userInfo?.["userLocation"]}
+                <div className="flex flex-col gap-0.5">
+                  <p className="font-display text-lg font-bold text-text-primary">
+                    {session.user?.name}
+                  </p>
+                  {userInfo?.["username"] && (
+                    <p className="text-sm text-text-secondary">
+                      {userInfo?.["username"]}
                     </p>
-                  </>
-                )}
-                {userInfo?.["userDob"] !== null && (
-                  <>
-                    <p className="ml-1 text-xs text-gray-400">Date of Birth</p>
-                    <p className="h-10 p-2 mb-1">{userInfo?.["userDob"]}</p>
-                  </>
-                )}
-
-                <button
-                  className="flex mt-auto justify-center btn-primary "
-                  onClick={() => showInfoModal(true)}
-                >
-                  Edit
-                </button>
-              </div>
-            </div>
-            <div className="p-4 bg-white rounded-md shadow-md dark:bg-darker">
-              <h2 className="border-b-[0.5px] pb-1 mt-2 heading-2">
-                Reset Account
-              </h2>
-              <div className="flex flex-col gap-2 mb-4">
-                <p className="my-1 text-sm">
-                  Clear your stats and game history
-                </p>
-                <button
-                  className="w-2/3 btn-secondary"
-                  onClick={() => deleteStats(userEmail)}
-                >
-                  Reset Stats
-                </button>
-              </div>
-            </div>
-            <div className="p-4 bg-white rounded-md shadow-md dark:bg-darker">
-              <h2 className="border-b-[0.5px] pb-1 mt-2 heading-2">
-                Delete Account
-              </h2>
-              <div className="flex flex-col mb-4">
-                <p className="my-1 text-sm">
-                  Warning: this action cannot be undone
-                </p>
-                <button
-                  className="w-2/3 mt-2 btn-secondary"
-                  onClick={() => deleteUser(userEmail)}
-                >
-                  Delete Account
-                </button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex flex-col col-start-1 col-end-3 self-center justify-center p-6 rounded-md lg:mx-24 lg:p-10 bg-lightest dark:bg-darker">
-              <div className="flex flex-col items-center gap-4">
-                <h2 className="border-b-[0.5px] pb-1 heading-2">
-                  Create your account in a few seconds
-                </h2>
-                <Link href="/api/auth/signin">
-                  <button className="h-10 px-4 rounded-md bg-light dark:bg-dark">
-                    Get started
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => showProfilePicModal(true)}
+                    className={buttonQuiet}
+                  >
+                    Change photo
                   </button>
-                </Link>
-                <div className="flex flex-col items-center">
-                  <p className="text-xs">Already have an account?</p>
-                  <Link className="text-xs" href="/api/auth/signin">
-                    Sign in
-                  </Link>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => showInfoModal(true)}
+                className={`${buttonPrimary} sm:w-fit`}
+              >
+                Edit details
+              </button>
+            </div>
+
+            {/* Personal details - one flowing list, thin dividers between
+                rows, no separate background per row. */}
+            <div className="flex flex-col divide-y divide-border-subtle border-y border-border-subtle">
+              {userInfo?.["username"] !== null && (
+                <DetailRow label="Name" value={userInfo?.["username"]} />
+              )}
+              {userInfo?.["userLocation"] !== null && (
+                <DetailRow
+                  label="Location"
+                  value={userInfo?.["userLocation"]}
+                />
+              )}
+              {userInfo?.["userDob"] !== null && (
+                <DetailRow label="Date of birth" value={userInfo?.["userDob"]} />
+              )}
+            </div>
+
+            {/* Account actions - same dividers-only treatment, no nested
+                colored box. */}
+            <div className="flex flex-col gap-4">
+              <h2 className="heading-2">Account actions</h2>
+
+              <div className="flex flex-col divide-y divide-border-subtle border-y border-border-subtle">
+                <div className="flex flex-col items-start justify-between gap-3 py-4 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-0.5">
+                    <p className="font-medium text-text-primary">
+                      Reset stats
+                    </p>
+                    <p className="text-sm text-text-secondary">
+                      Clear your stats and game history
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmResetStats(true)}
+                    className={`${buttonSecondary} w-full sm:w-fit`}
+                  >
+                    Reset stats
+                  </button>
+                </div>
+
+                <div className="flex flex-col items-start justify-between gap-3 py-4 sm:flex-row sm:items-center">
+                  <div className="flex flex-col gap-0.5">
+                    <p className="font-medium text-text-primary">
+                      Delete account
+                    </p>
+                    <p className="text-sm text-text-secondary">
+                      This action cannot be undone
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteAccount(true)}
+                    className={`${buttonDestructive} w-full sm:w-fit`}
+                  >
+                    Delete account
+                  </button>
                 </div>
               </div>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      ) : (
+        <AuthPromptBanner
+          title="Create your account in a few seconds"
+          description="Save your stats, join groups and play with friends."
+          primaryActionLabel="Get started"
+          primaryActionHref="/api/auth/signin"
+          secondaryText="Already have an account?"
+          secondaryActionLabel="Sign in"
+          secondaryActionHref="/api/auth/signin"
+        />
+      )}
     </div>
   );
 };
